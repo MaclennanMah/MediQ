@@ -1,0 +1,21 @@
+{
+  "name": "mediq",
+  "private": true,
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "lint": "npm --prefix frontend run lint && npm --prefix backend run lint",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
+}
