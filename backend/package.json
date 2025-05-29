@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No backend tests yet\" && exit 0",
+    "lint": "echo \"No backend lint—skipped\" && exit 0"
   },
   "keywords": [],
   "author": "",

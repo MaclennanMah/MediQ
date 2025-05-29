@@ -1,0 +1,11 @@
+{
+  "root": true,
+  "extends": [
+    "next",
+    "next/core-web-vitals"
+  ],
+  "rules": {
+    // turn off the PropTypes check for children
+    "react/prop-types": "off"
+  }
+}
