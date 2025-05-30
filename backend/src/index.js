@@ -15,6 +15,11 @@ app.use(express.json());
 import pingRouter from "./routes/ping.js";
 app.use("/ping", pingRouter);
 
+// Standard route
+app.get('/', (req, res) => {
+  res.json({'message': 'Backend is running'})
+})
+
 // 5. Health check (you can keep this before or after)
 app.get("/health", (req, res) => {
   res.json({ status: "OK", timestamp: Date.now() });
