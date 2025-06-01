@@ -1,12 +1,10 @@
 'use client'
 
-import {useDisclosure} from '@mantine/hooks';
 import {AppShell} from "@mantine/core";
 import ClinicList from "@components/clinic-list/clinic-list";
 
 
 function BasicAppShell() {
-    const [opened, {toggle}] = useDisclosure();
 
     return (
         <AppShell
