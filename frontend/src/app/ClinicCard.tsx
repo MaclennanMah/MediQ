@@ -1,32 +1,44 @@
 import {Badge, Button, Card, Group, Stack, Text} from '@mantine/core';
 
-function ClinicCard() {
+export interface Clinic {
+    id: string;
+    type: string;
+    name: string;
+    isOpen: boolean;
+    distance: string;
+    closingTime: string;
+    estimatedWaitTime: string;
+}
+
+interface ClinicCardProps {
+    clinic: Clinic;
+}
+
+function ClinicCard({clinic}: ClinicCardProps) {
     return (
         <Card shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section>
                 <Group justify="flex-start" align="center" p="md">
                     <Badge color="blue" variant="light">
                         <Text size="xs" c="dimmed">
-                            {/*TODO: Replace with dynamic clinic type*/}
-                            Hospital
+                            {clinic.type}
                         </Text>
                     </Badge>
-                    <Badge color="blue" variant="light">
+                    <Badge color={clinic.isOpen ? "green" : "red"} variant="light">
                         <Text size="xs" c="dimmed">
-                            {/*TODO: Replace with dynamic status OPEN/CLOSED*/}
-                            OPEN
+                            {clinic.isOpen ? "OPEN" : "CLOSED"}
                         </Text>
                     </Badge>
                 </Group>
             </Card.Section>
 
             <Group justify="space-between" mb="xs">
-                <Text fw={500}>Toronto Western Hospital</Text>
-                <Badge color="pink">1h 5m</Badge>
+                <Text fw={500}>{clinic.name}</Text>
+                <Badge color="pink">{clinic.estimatedWaitTime}</Badge>
             </Group>
             <Stack gap="0">
-                <Text>Distance</Text>
-                <Text>Closing time</Text>
+                <Text>Distance: {clinic.distance}</Text>
+                <Text>Closing time: {clinic.closingTime}</Text>
             </Stack>
             <Group>
                 <Button color="blue" mt="md" radius="md">
