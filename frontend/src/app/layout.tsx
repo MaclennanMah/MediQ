@@ -1,10 +1,11 @@
 import '@mantine/core/styles.css';
 
 import {ColorSchemeScript, mantineHtmlProps, MantineProvider} from '@mantine/core';
+import React from "react";
 
 export const metadata = {
-    title: 'My Mantine app',
-    description: 'I have followed setup instructions carefully',
+    title: 'MediQ',
+    description: 'Hospital and clinic wait times',
 };
 
 export default function RootLayout({
