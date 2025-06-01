@@ -1,27 +1,34 @@
 // TODO: scroll area?
-import {ActionIcon, Group, Input, NativeSelect, Popover, Stack, Text} from "@mantine/core";
+import {ActionIcon, Group, Input, NativeSelect, Popover, ScrollArea, Stack, Text} from "@mantine/core";
 import {SearchIcon} from "./icons/SearchIcon";
 import {ChevronDownIcon} from "./icons/ChevronDownIcon";
 import ClinicCard from "./ClinicCard";
 import {FilterIcon} from "./icons/FilterIcon";
+import {mockClinics} from "./mockData";
+import {useState} from "react";
 
 function ClinicList() {
-    const icon = <SearchIcon/>;
-    const chevronIcon = <ChevronDownIcon size={16}/>;
+    const [selectedType, setSelectedType] = useState<string>('All');
+
+    const filteredClinics = selectedType === 'All'
+        ? mockClinics
+        : mockClinics.filter(clinic => clinic.type === selectedType);
+
     return (
         <>
-            <Stack>
+            <Stack h="100%">
                 <Input
+                    mr="sm"
                     placeholder="Enter address to find nearest location"
                     rightSectionPointerEvents="all"
                     rightSection={
                         <ActionIcon variant="transparent" size="lg">
-                            {icon}
+                            {<SearchIcon/>}
                         </ActionIcon>
                     }
                 >
                 </Input>
-                <Group justify="space-between" align="center">
+                <Group justify="space-between" align="center" mr="sm">
                     <Popover width={300} trapFocus position="bottom" withArrow shadow="md">
                         <Popover.Target>
                             <ActionIcon variant="transparent"><FilterIcon/></ActionIcon>
@@ -34,13 +41,21 @@ function ClinicList() {
                         </Popover.Dropdown>
                     </Popover>
                     <NativeSelect
-                        rightSection={chevronIcon}
-                        data={['Clinic', 'Hospital']}
+                        rightSection={
+                            <ChevronDownIcon size={16}/>
+                        }
+                        data={['All', 'Clinic', 'Hospital', 'Urgent Care']}
+                        value={selectedType}
+                        onChange={(event) => setSelectedType(event.currentTarget.value)}
                     />
                 </Group>
-                <Stack>
-                    <ClinicCard></ClinicCard>
-                </Stack>
+                <ScrollArea>
+                    <Stack mr="sm">
+                        {filteredClinics.map(clinic => (
+                            <ClinicCard key={clinic.id} clinic={clinic}/>
+                        ))}
+                    </Stack>
+                </ScrollArea>
             </Stack>
         </>
     );
