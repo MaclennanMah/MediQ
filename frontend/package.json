@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mantine/core": "^8.0.2",
+    "@mantine/hooks": "^8.0.2",
     "next": "15.3.2",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
@@ -19,11 +21,16 @@
     "@eslint/js": "^9.27.0",
     "@next/eslint-plugin-next": "^15.3.2",
     "@tailwindcss/postcss": "^4",
+    "@types/node": "22.15.29",
+    "@types/react": "19.1.6",
     "eslint": "^9.27.0",
     "eslint-config-next": "^15.3.2",
     "eslint-plugin-next": "^0.0.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.2.0",
+    "postcss": "^8.5.4",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
     "tailwindcss": "^4"
   }
 }
