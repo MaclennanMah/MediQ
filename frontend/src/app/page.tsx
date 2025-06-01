@@ -13,9 +13,7 @@ function BasicAppShell() {
             padding="md"
         >
             <AppShell.Header>
-                <Group h="100%" px="md">
-                    <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm"/>
-                </Group>
+
             </AppShell.Header>
             <AppShell.Main>Main</AppShell.Main>
             <AppShell.Aside p="md">
