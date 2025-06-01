@@ -1,5 +1,5 @@
 import {Badge, Button, Card, Group, Stack, Text} from '@mantine/core';
-import {Clinic} from '../../types/clinic';
+import {Clinic} from '@/models/clinic';
 
 interface ClinicCardProps {
     clinic: Clinic;

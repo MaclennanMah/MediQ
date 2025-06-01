@@ -1,4 +1,4 @@
-import { Clinic } from '../types/clinic';
+import { Clinic } from '@/models/clinic';
 
 export const mockClinics: Clinic[] = [
   {

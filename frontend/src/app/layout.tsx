@@ -15,6 +15,7 @@ export default function RootLayout({
     return (
         <html lang="en" {...mantineHtmlProps}>
         <head>
+            <title>MediQ</title>
             <ColorSchemeScript/>
         </head>
         <body>

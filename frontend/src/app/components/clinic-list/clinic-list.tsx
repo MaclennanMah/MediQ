@@ -1,11 +1,13 @@
-// TODO: scroll area?
 import {ActionIcon, Group, Input, NativeSelect, Popover, ScrollArea, Stack, Text} from "@mantine/core";
-import {SearchIcon} from "../../icons/search-icon";
-import {ChevronDownIcon} from "../../icons/chevron-down-icon";
+
+
 import ClinicCard from "../clinic-card/clinic-card";
-import {FilterIcon} from "../../icons/filter-icon";
-import {mockClinics} from "../../data/mock-clinics";
+
 import {useState} from "react";
+import {mockClinics} from "@/data/mock-clinics";
+import {SearchIcon} from "@/icons/search-icon";
+import {FilterIcon} from "@/icons/filter-icon";
+import {ChevronDownIcon} from "@/icons/chevron-down-icon";
 
 function ClinicList() {
     const [selectedType, setSelectedType] = useState<string>('All');
@@ -36,7 +38,7 @@ function ClinicList() {
                         <Popover.Dropdown>
                             {/*TODO: add filter options here*/}
                             <Text>
-                                test for popover
+                                test filter options
                             </Text>
                         </Popover.Dropdown>
                     </Popover>
