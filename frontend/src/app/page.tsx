@@ -1,10 +1,8 @@
-'use client'
-
 import {AppShell} from "@mantine/core";
 import ClinicList from "@components/clinic-list/clinic-list";
 
 
-function BasicAppShell() {
+function App() {
 
     return (
         <AppShell
@@ -22,4 +20,4 @@ function BasicAppShell() {
 
 }
 
-export default BasicAppShell;
+export default App;
