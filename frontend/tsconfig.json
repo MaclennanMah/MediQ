@@ -23,8 +23,8 @@
       "@styles/*": [
         "styles/*"
       ],
-      "@types/*": [
-        "types/*"
+      "@models/*": [
+        "models/*"
       ],
       "@utils/*": [
         "utils/*"
