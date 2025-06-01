@@ -1,14 +1,5 @@
 import {Badge, Button, Card, Group, Stack, Text} from '@mantine/core';
-
-export interface Clinic {
-    id: string;
-    type: string;
-    name: string;
-    isOpen: boolean;
-    distance: string;
-    closingTime: string;
-    estimatedWaitTime: string;
-}
+import {Clinic} from '../../types/clinic';
 
 interface ClinicCardProps {
     clinic: Clinic;

@@ -1,7 +1,6 @@
 import '@mantine/core/styles.css';
 
 import {ColorSchemeScript, mantineHtmlProps, MantineProvider} from '@mantine/core';
-import React from "react";
 
 export const metadata = {
     title: 'MediQ',

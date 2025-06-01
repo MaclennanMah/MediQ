@@ -1,8 +1,9 @@
 'use client'
 
 import {useDisclosure} from '@mantine/hooks';
-import {AppShell, Burger, Group} from "@mantine/core";
-import ClinicList from "./ClinicList";
+import {AppShell} from "@mantine/core";
+import ClinicList from "@components/clinic-list/clinic-list";
+
 
 function BasicAppShell() {
     const [opened, {toggle}] = useDisclosure();
@@ -13,7 +14,6 @@ function BasicAppShell() {
             padding="md"
         >
             <AppShell.Header>
-
             </AppShell.Header>
             <AppShell.Main>Main</AppShell.Main>
             <AppShell.Aside p="md">

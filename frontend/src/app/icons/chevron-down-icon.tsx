@@ -12,4 +12,3 @@ export function ChevronDownIcon({ size, style, ...others }: ChevronDownIconProps
         </svg>
     );
 }
-
