@@ -26,6 +26,7 @@ app.get("/health", (req, res) => {
   res.json({ status: "OK", timestamp: Date.now() });
 });
 
+// -------------- FOR MONGODB -----------------------
 // Import the MongoDB connection helper and the test router
 import { connectToMongoDB } from "../database/mongodb_db/mongodb_connection.js";
 import mongodbTestRouter from "./routes/mongodb_test_route.js";
@@ -40,6 +41,22 @@ connectToMongoDB()
     console.error("❌ Failed to connect to MongoDB:", err);
     // We do NOT exit here, since ping/health endpoints can still work.
   });
+
+// -------------- FOR MySQL -----------------------
+import { connectToMySQL } from "../database/mysql_db/mysql_connection.js";
+import mysqlTestRouter from "./routes/mysql_test_route.js"
+
+connectToMySQL()
+  .then((mysqlConnection) => {
+    console.log('🚀 Now mounting /mysql_test_route');
+
+    // Inject `mysqlConnection` into req.db for all requests to this route
+    app.use('/mysql_test_route', mysqlTestRouter);
+  })
+  .catch((err) => {
+    console.error('❌ MySQL connection failed, skipping /mysql_test_route:');
+  });
+
 
 // 6. Start listening
 const PORT = process.env.PORT || 4000;
