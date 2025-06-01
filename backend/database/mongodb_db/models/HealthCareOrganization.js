@@ -6,6 +6,12 @@ const healthcareOrganizationSchema = new mongoose.Schema(
     organizationName: { type: String, required: true, trim: true },
     address:           { type: String, required: true, trim: true },
     phoneNumber:       { type: String, default: null },
+    organizationType: {
+      type: String,
+      required: true,
+      enum: ["Hospital", "Walk-In Clinic"], 
+      trim: true
+    },
     latestWaitTimeSubmissionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'WaitTimeSubmission',
