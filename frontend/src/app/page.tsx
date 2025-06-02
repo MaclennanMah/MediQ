@@ -1,6 +1,13 @@
-import {AppShell} from "@mantine/core";
-import ClinicList from "@components/clinic-list/clinic-list";
+'use client';
 
+import {AppShell, Group} from "@mantine/core";
+import ClinicList from "@components/clinic/clinic-list";
+
+import dynamic from "next/dynamic";
+const LazyMap = dynamic(() => import("@/components/clinic/clinic-map"), {
+    ssr: false,
+    loading: () => <p>Loading...</p>,
+});
 
 function App() {
 
@@ -11,10 +18,13 @@ function App() {
         >
             <AppShell.Header>
             </AppShell.Header>
-            <AppShell.Main>Main</AppShell.Main>
-            <AppShell.Aside p="md">
+
+            <AppShell.Main >
+                <Group>
+                <LazyMap/>
                 <ClinicList/>
-            </AppShell.Aside>
+            </Group>
+            </AppShell.Main>
         </AppShell>
     );
 

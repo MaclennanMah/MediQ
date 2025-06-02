@@ -1,13 +1,14 @@
 import {ActionIcon, Group, Input, NativeSelect, Popover, ScrollArea, Stack, Text} from "@mantine/core";
 
 
-import ClinicCard from "../clinic-card/clinic-card";
+
 
 import {useState} from "react";
 import {mockClinics} from "@/data/mock-clinics";
 import {SearchIcon} from "@/icons/search-icon";
 import {FilterIcon} from "@/icons/filter-icon";
 import {ChevronDownIcon} from "@/icons/chevron-down-icon";
+import ClinicCard from "@components/clinic/clinic-card";
 
 function ClinicList() {
     const [selectedType, setSelectedType] = useState<string>('All');
@@ -18,7 +19,7 @@ function ClinicList() {
 
     return (
         <>
-            <Stack h="100%">
+            <Stack h="90vh">
                 <Input
                     mr="sm"
                     placeholder="Enter address to find nearest location"
