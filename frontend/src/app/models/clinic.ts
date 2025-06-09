@@ -6,4 +6,8 @@ export interface Clinic {
     distance: string;
     closingTime: string;
     estimatedWaitTime: string;
+    location?: {
+        lat: number;
+        lng: number;
+    };
 }
