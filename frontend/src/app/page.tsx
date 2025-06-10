@@ -16,7 +16,7 @@ function App() {
         <ClinicProvider>
             <AppShell
                 header={{height: 60}}
-                padding="md"
+                padding={0}
             >
                 {/*<AppShell.Header>*/}
                 {/*</AppShell.Header>*/}
