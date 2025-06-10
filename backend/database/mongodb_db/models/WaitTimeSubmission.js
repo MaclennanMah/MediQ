@@ -22,6 +22,10 @@ const waitTimeSubmissionSchema = new mongoose.Schema(
   }
 );
 
+// By adding this index, it will be extremely fast to return the latest wait time submission
+waitTimeSubmissionSchema.index({ organizationId: 1, submittedBy: 1, submissionDate: -1 });
+
+
 const WaitTimeSubmission = mongoose.model(
   'WaitTimeSubmission',
   waitTimeSubmissionSchema,
