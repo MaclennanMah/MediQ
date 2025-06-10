@@ -1,8 +1,35 @@
-import {Badge, Button, Card, Group, Stack, Text} from '@mantine/core';
+import {Badge, Button, Card, Group, Skeleton, Stack, Text} from '@mantine/core';
 import {Clinic} from '@models/clinic';
 
 interface ClinicCardProps {
     clinic: Clinic;
+}
+
+export function ClinicCardSkeleton() {
+    return (
+        <Card shadow="sm" padding="lg" radius="md" miw={400} withBorder>
+            <Card.Section>
+                <Group justify="flex-start" align="center" p="md">
+                    <Skeleton height={20} width={62} radius="sm"/>
+                    <Skeleton height={20} width={62} radius="sm"/>
+                </Group>
+            </Card.Section>
+
+            <Group justify="space-between" mb="xs">
+                <Skeleton height={25} width={150} radius="sm"/>
+                <Skeleton height={20} width={42} radius="sm"/>
+            </Group>
+            <Stack gap="0">
+                <Skeleton height={24} width="70%" radius="sm"/>
+                <Skeleton height={24} width="60%" radius="sm"/>
+            </Stack>
+            <Group>
+                <Skeleton height={36} width={100} mt="md" radius="md"/>
+                <Skeleton height={36} width={100} mt="md" radius="md"/>
+                <Skeleton height={36} width={100} mt="md" radius="md"/>
+            </Group>
+        </Card>
+    );
 }
 
 function ClinicCard({clinic}: ClinicCardProps) {

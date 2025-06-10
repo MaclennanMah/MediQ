@@ -1,25 +1,23 @@
 import {ActionIcon, Group, Input, NativeSelect, Popover, ScrollArea, Stack, Text} from "@mantine/core";
 
-
-
-
 import {useState} from "react";
-import {mockClinics} from "@/data/mock-clinics";
 import {SearchIcon} from "@/icons/search-icon";
 import {FilterIcon} from "@/icons/filter-icon";
 import {ChevronDownIcon} from "@/icons/chevron-down-icon";
-import ClinicCard from "@components/clinic/clinic-card";
+import ClinicCard, {ClinicCardSkeleton} from "@components/clinic/clinic-card";
+import {useClinicContext} from "@/context/clinic-context";
 
 function ClinicList() {
     const [selectedType, setSelectedType] = useState<string>('All');
+    const {clinics, loading, error} = useClinicContext();
 
     const filteredClinics = selectedType === 'All'
-        ? mockClinics
-        : mockClinics.filter(clinic => clinic.type === selectedType);
+        ? clinics
+        : clinics.filter(clinic => clinic.type === selectedType);
 
     return (
         <>
-            <Stack h="90vh">
+            <Stack h="90vh" maw={400}>
                 <Input
                     mr="sm"
                     placeholder="Enter address to find nearest location"
@@ -52,13 +50,31 @@ function ClinicList() {
                         onChange={(event) => setSelectedType(event.currentTarget.value)}
                     />
                 </Group>
-                <ScrollArea>
-                    <Stack mr="sm">
-                        {filteredClinics.map(clinic => (
-                            <ClinicCard key={clinic.id} clinic={clinic}/>
-                        ))}
-                    </Stack>
-                </ScrollArea>
+
+                {loading ? (
+                    <ScrollArea>
+                        <Stack mr="sm">
+                            {/* Display 3 skeleton cards while loading */}
+                            {Array(3).fill(0).map((_, index) => (
+                                <ClinicCardSkeleton key={index}/>
+                            ))}
+                        </Stack>
+                    </ScrollArea>
+                ) : error ? (
+                    <Text>{error}</Text>
+                ) : (
+                    <ScrollArea>
+                        <Stack mr="sm">
+                            {filteredClinics.length > 0 ? (
+                                filteredClinics.map(clinic => (
+                                    <ClinicCard key={clinic.id} clinic={clinic}/>
+                                ))
+                            ) : (
+                                <Text>No medical facilities found in this area.</Text>
+                            )}
+                        </Stack>
+                    </ScrollArea>
+                )}
             </Stack>
         </>
     );
