@@ -18,8 +18,8 @@ function App() {
                 header={{height: 60}}
                 padding="md"
             >
-                <AppShell.Header>
-                </AppShell.Header>
+                {/*<AppShell.Header>*/}
+                {/*</AppShell.Header>*/}
 
                 <AppShell.Main>
                     <Group>

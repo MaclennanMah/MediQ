@@ -1,7 +1,9 @@
 import '@mantine/core/styles.css';
-
 import {ColorSchemeScript, mantineHtmlProps, MantineProvider} from '@mantine/core';
-import './globals.css'
+import './globals.css';
+import { Header } from '@components/ui/header';
+import Undici from "undici-types";
+import Headers = Undici.Headers;
 
 export const metadata = {
     title: 'MediQ',
@@ -20,7 +22,10 @@ export default function RootLayout({
             <ColorSchemeScript/>
         </head>
         <body>
-        <MantineProvider>{children}</MantineProvider>
+            <Header />
+            <MantineProvider>
+                {children}
+            </MantineProvider>
         </body>
         </html>
     );
