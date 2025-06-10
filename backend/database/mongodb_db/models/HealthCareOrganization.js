@@ -12,11 +12,6 @@ const healthcareOrganizationSchema = new mongoose.Schema(
       enum: ["Hospital", "Walk-In Clinic"], 
       trim: true
     },
-    latestWaitTimeSubmissionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'WaitTimeSubmission',
-      default: null,
-    },
   },
   {
     timestamps: true,
