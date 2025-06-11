@@ -58,11 +58,11 @@ router.get('/latest/organization/:orgID', async (req, res) => {
 })
 
 /**
- * GET /submissions/latest/patient/orgID
- * --> This route returns the latest patient wait time submissions for
+ * GET /submissions/latest/user/orgID
+ * --> This route returns the latest user submitted wait time submission for
  *     a specific organization.
  */
-router.get('/latest/patient/:orgID', async (req, res) => {
+router.get('/latest/user/:orgID', async (req, res) => {
      // Get the org ID
     const {orgID} = req.params;
 
@@ -76,7 +76,7 @@ router.get('/latest/patient/:orgID', async (req, res) => {
         const latestOrganizationWaitTimeSubmission = await WaitTimeSubmission
         .findOne({
             organizationId: orgID,
-            submittedBy: 'patient'
+            submittedBy: 'user'
         })
         .sort({submissionDate: -1})
         .lean();
@@ -143,10 +143,10 @@ router.post('/organization/:orgID', async (req, res) => {
 
 
 /**
- * POST /submissions/patient/orgID
- * --> This route adds a wait time submission submitted by a patient.
+ * POST /submissions/user/orgID
+ * --> This route adds a user submitted wait time submission for a specific organization.
  */
-router.post('/patient/:orgID', async (req, res) => {
+router.post('/user/:orgID', async (req, res) => {
      // Get the org ID
     const {orgID} = req.params;
 
@@ -176,15 +176,15 @@ router.post('/patient/:orgID', async (req, res) => {
         const submission = await WaitTimeSubmission.create({
             organizationId: orgID,
             waitTime: waitTime,
-            submittedBy: 'patient',
+            submittedBy: 'user',
             ipAddress: req.ip
         })
 
-        return res.status(201).json({message: `Successfully added the patient wait time submission: ${submission}`})
+        return res.status(201).json({message: `Successfully added the user wait time submission: ${submission}`})
 
     } catch (error) {
         console.log(error)
-        res.status(500).json({error: 'Could not add patient wait time submissions'})
+        res.status(500).json({error: 'Could not add user wait time submissions'})
     }
 })
 
