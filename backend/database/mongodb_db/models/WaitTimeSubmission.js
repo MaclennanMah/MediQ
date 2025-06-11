@@ -12,7 +12,7 @@ const waitTimeSubmissionSchema = new mongoose.Schema(
     submissionDateTimeStamp: { type: Date, default: Date.now },
     submittedBy: {
       type: String,
-      enum: ['organization', 'patient'],
+      enum: ['organization', 'user'],
       required: true,
     },
     ipAddress: { type: String, default: null },
