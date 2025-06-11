@@ -29,16 +29,12 @@ app.get("/health", (req, res) => {
 // -------------- FOR MONGODB -----------------------
 // Import the MongoDB connection helper and the test router
 import { connectToMongoDB } from "../database/mongodb_db/mongodb_connection.js";
-import mongodbTestRouter from "./routes/mongodb_test_route.js";
 import submissionRouter from "./routes/submissions.js"
 
 // 4. Connect to MongoDB, then mount only the test route
 connectToMongoDB()
   .then(() => {
-    console.log("✅ MongoDB connected. Mounting /mongodb_test_route…");
-    app.use("/mongodb_test_route", mongodbTestRouter);
-
-    console.log("Now mounting /submissions.js routes....")
+    console.log("✅ MongoDB connected. Now mounting /submissions.js routes....")
     app.use("/submissions", submissionRouter)
   })
   .catch((err) => {
