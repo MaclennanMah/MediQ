@@ -40,11 +40,13 @@ function App() {
                     </Box>
                 </AppShell.Header>
 
-                <AppShell.Main>
-                    <Group>
-                        <ClinicMap/>
-                        <ClinicList/>
-                    </Group>
+                <AppShell.Main className="main-container">
+                    <div className="sidebar">
+                        <ClinicList />
+                    </div>
+                    <div className="map-container">
+                        <ClinicMap />
+                    </div>
                 </AppShell.Main>
 
             </AppShell>
