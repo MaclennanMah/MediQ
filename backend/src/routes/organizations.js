@@ -5,6 +5,13 @@ import HealthcareOrganization from '../../database/mongodb_db/models/HealthCareO
 // Set router
 const router = express.Router();
 
+// Import dotenv
+import dotenv from "dotenv";
+dotenv.config();
+
+// Get the auth header
+const authToken = process.env.AUTHORIZATION_TOKEN
+
 /**
  * GET /organizations
  * --> This route returns all healthcare organizations in the healthcare_organization collection in mongodb
@@ -56,11 +63,26 @@ router.get('/:orgID', async (req, res) => {
  */
 
 router.post('/', async (req, res) => {
+    // First get the authorization header
+    const authorization = req.headers.authorization
+    
+    // Check if request included auth header
+    if (!authorization) {
+        return res.status(401).json({message: 'Authorization header is missing'})
+    }
+
+    // Expecting format: "Bearer token"
+    const token = authorization.split(' ')[1];
+
+    // Validate auth header
+    if (!token || token != authToken) {
+        return res.status(401).json({message: 'Invalid Authorization token'})
+    }
     
     try {
          // Get the data from the req.json
         const newOrganization = await HealthcareOrganization.create(req.body)
-        res.status(201).json({message: 'Successfully created new organization'})
+        return res.status(201).json({message: 'Successfully created new organization'})
     }
     catch (error) {
         if (error.name === 'ValidationError') {
