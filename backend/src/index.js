@@ -64,6 +64,16 @@ connectToMySQL()
   });
 
 
+//Catch malformed JSON bodies
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    return res
+      .status(400)
+      .json({ error: "Invalid JSON payload. Please check your request body." });
+  }
+  next(err);
+});
+
 // 6. Start listening
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
