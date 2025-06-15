@@ -61,7 +61,6 @@ router.get('/:orgID', async (req, res) => {
  * POST /organizations/
  * --> This route adds a single organization to the database
  */
-
 router.post('/', async (req, res) => {
     // First get the authorization header
     const authorization = req.headers.authorization
@@ -91,5 +90,56 @@ router.post('/', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }   
 })
+
+/**
+ * PUT /organizations/:orgID
+ * --> This route updates an organization using its orgID
+ */
+router.put('/:orgID', async (req, res) => {
+    // Get the orgID from request
+    const { orgID } = req.params;
+
+    // Validate the ID
+    if (!mongoose.Types.ObjectId.isValid(orgID)) {
+        return res.status(400).json({ error: 'Invalid organization ID' });
+    }
+
+    // Check for Authorization header
+    const authorization = req.headers.authorization;
+    if (!authorization) {
+        return res.status(401).json({ message: 'Authorization header is missing' });
+    }
+
+    // Extract and validate token
+    const token = authorization.split(' ')[1];
+    if (!token || token !== authToken) {
+        return res.status(401).json({ message: 'Invalid Authorization token' });
+    }
+
+    try {
+        // Try to update the organization
+        const updatedOrganization = await HealthcareOrganization.findByIdAndUpdate(
+            orgID,
+            req.body,
+            { new: true, runValidators: true } // return updated doc and validate input
+        ).lean();
+
+        // If the org was not found
+        if (!updatedOrganization) {
+            return res.status(404).json({ message: 'Organization not found' });
+        }
+        
+        return res.status(200).json({
+            message: 'Organization successfully updated',
+            data: updatedOrganization
+        });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ error: error.message });
+        }
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 export default router;
