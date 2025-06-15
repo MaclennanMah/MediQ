@@ -9,18 +9,22 @@ const waitTimeSubmissionSchema = new mongoose.Schema(
       required: true,
     },
     waitTime: { type: Number, required: true },
-    submissionDate: { type: Date, default: Date.now },
+    submissionDateTimeStamp: { type: Date, default: Date.now },
     submittedBy: {
       type: String,
-      enum: ['organization', 'patient'],
+      enum: ['organization', 'user'],
       required: true,
     },
     ipAddress: { type: String, default: null },
   },
   {
-    timestamps: true,
+    timestamps: false,
   }
 );
+
+// By adding this index, it will be extremely fast to return the latest wait time submission
+waitTimeSubmissionSchema.index({ organizationId: 1, submittedBy: 1, submissionDate: -1 });
+
 
 const WaitTimeSubmission = mongoose.model(
   'WaitTimeSubmission',
