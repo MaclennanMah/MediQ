@@ -30,12 +30,18 @@ app.get("/health", (req, res) => {
 // Import the MongoDB connection helper and the test router
 import { connectToMongoDB } from "../database/mongodb_db/mongodb_connection.js";
 import submissionRouter from "./routes/submissions.js"
+import organizationsRouter from "./routes/organizations.js"
 
 // 4. Connect to MongoDB, then mount only the test route
 connectToMongoDB()
   .then(() => {
+    // Mount the submissions router
     console.log("✅ MongoDB connected. Now mounting /submissions.js routes....")
     app.use("/submissions", submissionRouter)
+
+    // Mount the Organizations router
+    console.log("Mounting Organizations router.....")
+    app.use("/organizations", organizationsRouter)
   })
   .catch((err) => {
     console.error("❌ Failed to connect to MongoDB:", err);
