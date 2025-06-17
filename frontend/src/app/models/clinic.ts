@@ -1,13 +1,15 @@
 export interface Clinic {
-    id: string;
-    type: string;
-    name: string;
-    isOpen: boolean;
-    distance: string;
-    closingTime: string;
-    estimatedWaitTime: string;
-    location?: {
-        lat: number;
-        lng: number;
-    };
+  id: string;
+  name: string;
+  type: string;
+  isOpen: boolean;
+  closingTime: string;
+  estimatedWaitTime: string;
+  // your existing location shape:
+  location: {
+    lat: number;
+    lng: number;
+  };
+  // switch `distance` from string to an optional number (metres)
+  distance?: number;
 }
