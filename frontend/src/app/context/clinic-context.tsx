@@ -70,7 +70,7 @@ function updateClinicDistances(
       );
       return {
         ...clinic,
-        distance: `${distance} km`
+        distance: `${distance} km from you`
       };
     }
     return {
