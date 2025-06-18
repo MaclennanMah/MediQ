@@ -16,6 +16,7 @@ import { Clinic } from '@/models/clinic';
  * @param bounds - The bounding box coordinates [south, west, north, east]
  * @returns Promise<Clinic[]> - A promise that resolves to an array of clinics with emergency care or walk-in service
  */
+
 export async function fetchMedicalFacilities(bounds: [number, number, number, number]): Promise<Clinic[]> {
   try {
     const [south, west, north, east] = bounds;
@@ -100,6 +101,7 @@ export async function fetchMedicalFacilities(bounds: [number, number, number, nu
   }
 }
 
+
 /**
  * Transforms Overpass API data to match the Clinic interface.
  * @param data - The raw data from Overpass API
@@ -123,26 +125,37 @@ function transformOverpassData(data: any): Clinic[] {
     })
     .filter((element: any) => {
       const name = (element.tags.name || element.tags['name:en'] || '').toLowerCase();
-      return name.includes('health') || 
-             name.includes('hospital') || 
-             name.includes('clinic') || 
-             name.includes('medical');
+      return name.includes('health') ||
+             name.includes('hospital') ||
+             name.includes('clinic') ||
+             name.includes('medical') ||
+             name.includes('urgent care') ||
+             name.includes('walk-in') ||
+             name.includes('emergency') ||
+             element.tags.amenity === 'hospital' ||
+             element.tags.amenity === 'clinic' ||
+             element.tags.amenity === 'doctors' ||
+             element.tags.healthcare;
     })
     .map((element: any, index: number) => {
-      let type = 'Clinic';
+      let type = 'Walk-in Clinic'; // default to Walk
 
-      if (element.tags.amenity === 'hospital') {
-        type = 'Hospital';
-      } else if (element.tags.healthcare === 'emergency_department') {
-        type = 'Emergency Department';
-      } else if (element.tags.healthcare === 'urgent_care') {
+      //check for urgent care > Emergency > explicit walk-in clinic indicators > check for general doctor's office/clinic
+      if (element.tags.healthcare === 'urgent_care') {
         type = 'Urgent Care';
+      } else if (element.tags.amenity === 'hospital' ||
+          element.tags.healthcare === 'emergency_department' ||
+          element.tags.emergency === 'yes' ||
+          element.tags['emergency:department'] === 'yes' ||
+          element.tags.emergency === '24/7') {
+        type = 'Emergency';
       } else if (
-        element.tags['healthcare:speciality'] === 'walk_in' || 
-        element.tags.walk_in === 'yes' || 
-        element.tags.appointment === 'no' ||
-        (element.tags.name && /walk.?in/i.test(element.tags.name))
-      ) {
+          element.tags['healthcare:speciality'] === 'walk_in' ||
+          element.tags.walk_in === 'yes' ||
+          element.tags.appointment === 'no' ||
+          (element.tags.name && /walk.?in/i.test(element.tags.name))) {
+        type = 'Walk-in Clinic';
+      } else if (element.tags.amenity === 'doctors' || element.tags.amenity === 'clinic') {
         type = 'Walk-in Clinic';
       }
 
@@ -150,11 +163,11 @@ function transformOverpassData(data: any): Clinic[] {
 
       if (type === 'Walk-in Clinic' && !(/walk.?in/i.test(name))) {
         name += ' (Walk-in)';
-      } else if (element.tags.emergency === '24/7' || 
+      } else if (element.tags.emergency === '24/7' ||
           (element.tags['emergency:time'] && element.tags['emergency:time'].includes('24/7'))) {
         name += ' (24/7 Emergency Care)';
       } else if (element.tags.emergency === 'yes' || element.tags['emergency:department'] === 'yes') {
-        name += ' (Emergency Care)';
+        name += ' (Emergency)';
       }
 
       let isOpen = true;
@@ -165,7 +178,7 @@ function transformOverpassData(data: any): Clinic[] {
         type,
         name,
         isOpen,
-        distance: 'N/A', // This would need to be calculated based on user location
+        distance: 'Calculating...', // This would need to be calculated based on user location
         closingTime,
         estimatedWaitTime: 'N/A', // We don't have this data from Overpass
       };
