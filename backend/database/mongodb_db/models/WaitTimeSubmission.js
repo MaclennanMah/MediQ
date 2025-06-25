@@ -1,6 +1,7 @@
 // backend/database/mongodb_db/models/WaitTimeSubmission.js
 import mongoose from 'mongoose';
 import { estimateWaitTime } from '../../../services/estimateWaitTime';
+import HealthcareOrganization from './HealthCareOrganization';
 
 const waitTimeSubmissionSchema = new mongoose.Schema(
   {
@@ -31,8 +32,7 @@ waitTimeSubmissionSchema.index({ organizationId: 1, submittedBy: 1, submissionDa
 waitTimeSubmissionSchema.post('save', async function(doc) {
   try {
     const newEstimate = await estimateWaitTime(doc.organizationId, 20);
-    await mongoose.model('HealthcareOrganization')
-      .findByIdAndUpdate(doc.organizationId, { estimatedWaitTime: newEstimate });
+    await HealthcareOrganization.findByIdAndUpdate(doc.organizationId, { estimatedWaitTime: newEstimate });
   } catch (err) {
     console.error('Failed to update estimatedWaitTime:', err);
   }
