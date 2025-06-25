@@ -17,8 +17,6 @@ const waitTimeSubmissionSchema = new mongoose.Schema(
       required: true,
     },
     ipAddress: { type: String, default: null },
-    // New field for the live estimate (in minutes)
-    estimatedWaitTime: { type: Number, default: null }
   },
   {
     timestamps: false,
