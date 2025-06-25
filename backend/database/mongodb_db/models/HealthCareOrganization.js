@@ -12,6 +12,8 @@ const healthcareOrganizationSchema = new mongoose.Schema(
       enum: ["Hospital", "Walk-In Clinic"], 
       trim: true
     },
+    // New field for the live estimate (in minutes)
+    estimatedWaitTime: { type: Number, default: null }
   },
   {
     timestamps: true,
