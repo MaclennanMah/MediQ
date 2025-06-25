@@ -151,11 +151,16 @@ router.post('/user/:orgID', async (req, res) => {
     const {orgID} = req.params;
 
     // Get the wait time
-    const {waitTime} = req.body;
+    const {waitTime} = req.body || {};
 
     // First check if the org id is valid
     if (!mongoose.Types.ObjectId.isValid(orgID)) {
         return res.status(400).json({error: 'Error! An invalid organization id was entered'})
+    }
+
+    // Check if wait time is defined
+    if (waitTime === undefined) {
+        return res.status(400).json({error: 'Missing waitTime key in request body'})
     }
 
     // Now check if the organization ID even exists

@@ -1,7 +1,7 @@
 // backend/database/mongodb_db/models/WaitTimeSubmission.js
 import mongoose from 'mongoose';
-import { estimateWaitTime } from '../../../services/estimateWaitTime';
-import HealthcareOrganization from './HealthCareOrganization';
+import {estimateWaitTime} from '../../../services/estimateWaitTime.js';
+import HealthcareOrganization from '../models/HealthCareOrganization.js';
 
 const waitTimeSubmissionSchema = new mongoose.Schema(
   {
