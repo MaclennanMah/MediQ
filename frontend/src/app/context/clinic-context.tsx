@@ -5,6 +5,17 @@ import { Clinic } from '@/models/clinic';
 import { fetchMedicalFacilities } from '@/services/overpass-api';
 import { mockClinics } from '@/data/mock-clinics';
 
+export interface EnrichedClinic extends Clinic {
+  waitTime: number | null;
+  services?: string[];
+  hours?: string;
+  contact?: {
+    phone?: string;
+    email?: string;
+  };
+}
+
+
 interface ClinicContextType {
   clinics: Clinic[];
   loading: boolean;
@@ -33,21 +44,32 @@ export const ClinicProvider: React.FC<ClinicProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
   const [currentBounds, setCurrentBounds] = useState<[number, number, number, number] | null>(null);
 
-  const updateMapBounds = useCallback(async (bounds: [number, number, number, number]) => {
-    setCurrentBounds(bounds);
-    setLoading(true);
-    setError(null);
+ const updateMapBounds = useCallback(async (bounds: [number, number, number, number]) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const facilities = await fetchMedicalFacilities(bounds);
+    const rawData = facilities.length ? facilities : mockClinics;
 
-    try {
-      const facilities = await fetchMedicalFacilities(bounds);
-      setClinics(facilities.length > 0 ? facilities : mockClinics);
-    } catch (err) {
-      setError('Failed to fetch medical facilities');
-      console.error('Error fetching medical facilities:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchMedicalFacilities, mockClinics]);
+    const enrichedData = rawData.map(c => ({
+      ...c,
+      services: c.services ?? ['General Service'],
+      hours: c.hours ?? 'N/A',
+      contact: c.contact ?? {
+        phone: 'Not available',
+        email: 'Not available',
+      },
+    }));
+
+    setClinics(enrichedData);
+  } catch (e) {
+    setClinics(mockClinics);
+    setError('Failed to fetch data');
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
 
   const value: ClinicContextType = {
     clinics,

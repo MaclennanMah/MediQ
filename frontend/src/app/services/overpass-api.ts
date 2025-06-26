@@ -100,97 +100,79 @@ export async function fetchMedicalFacilities(bounds: [number, number, number, nu
   }
 }
 
+function parseContact(tags: Record<string, string>) {
+  const phone  = tags.phone   ?? tags['contact:phone'];
+  const email  = tags.email   ?? tags['contact:email'];
+  return (phone || email) ? { phone, email } : undefined;
+}
+
+
+
 /**
  * Transforms Overpass API data to match the Clinic interface.
  * @param data - The raw data from Overpass API
  * @returns Clinic[] - An array of clinics
  */
 function transformOverpassData(data: any): Clinic[] {
-  if (!data.elements || !Array.isArray(data.elements)) {
-    return [];
-  }
+  if (!data.elements || !Array.isArray(data.elements)) return [];
 
-  const nodeMap: Record<string, { lat: number, lon: number }> = {};
-  data.elements.forEach((element: any) => {
-    if (element.type === 'node' && element.id && element.lat !== undefined && element.lon !== undefined) {
-      nodeMap[element.id] = { lat: element.lat, lon: element.lon };
-    }
+  /** cache nodes so ways/relations can get a centre */
+  const nodeMap: Record<string, { lat: number; lon: number }> = {};
+  data.elements.forEach((el: any) => {
+    if (el.type === "node") nodeMap[el.id] = { lat: el.lat, lon: el.lon };
   });
 
   return data.elements
-    .filter((element: any) => {
-      return element.tags && (element.tags.name || element.tags['name:en']);
-    })
-    .filter((element: any) => {
-      const name = (element.tags.name || element.tags['name:en'] || '').toLowerCase();
-      return name.includes('health') || 
-             name.includes('hospital') || 
-             name.includes('clinic') || 
-             name.includes('medical');
-    })
-    .map((element: any, index: number) => {
-      let type = 'Clinic';
+    .filter((el: any) => el.tags && (el.tags.name || el.tags["name:en"]))
+    .map((el: any, idx: number) => {
+      const t = el.tags;
 
-      if (element.tags.amenity === 'hospital') {
-        type = 'Hospital';
-      } else if (element.tags.healthcare === 'emergency_department') {
-        type = 'Emergency Department';
-      } else if (element.tags.healthcare === 'urgent_care') {
-        type = 'Urgent Care';
-      } else if (
-        element.tags['healthcare:speciality'] === 'walk_in' || 
-        element.tags.walk_in === 'yes' || 
-        element.tags.appointment === 'no' ||
-        (element.tags.name && /walk.?in/i.test(element.tags.name))
-      ) {
-        type = 'Walk-in Clinic';
-      }
+      /* ---------- BASIC FIELDS ---------- */
+      const id   = `overpass-${el.id ?? idx}`;
+      const name = t.name ?? t["name:en"] ?? "Unknown Facility";
+      const type =
+        t.amenity === "hospital"               ? "Hospital"      :
+        t.healthcare === "emergency_department"? "Urgent Care"   :
+        t.amenity === "clinic"                 ? "Clinic"        :
+                                                 "Clinic";
 
-      let name = element.tags.name || element.tags['name:en'] || 'Unknown Facility';
+      /* ---------- SERVICES (healthcare:speciality or amenity) ---------- */
+      const services =
+        t["healthcare:speciality"]?.split(";").map((s: string) => s.trim()) ??
+        (t.amenity === "hospital" ? ["Emergency Care"] :
+         t.amenity === "clinic"   ? ["General Practice"] : []);
 
-      if (type === 'Walk-in Clinic' && !(/walk.?in/i.test(name))) {
-        name += ' (Walk-in)';
-      } else if (element.tags.emergency === '24/7' || 
-          (element.tags['emergency:time'] && element.tags['emergency:time'].includes('24/7'))) {
-        name += ' (24/7 Emergency Care)';
-      } else if (element.tags.emergency === 'yes' || element.tags['emergency:department'] === 'yes') {
-        name += ' (Emergency Care)';
-      }
+      /* ---------- HOURS ---------- */
+      const hours = t.opening_hours ?? t["opening_hours"] ?? undefined;
 
-      let isOpen = true;
-      let closingTime = 'Unknown';
+      /* ---------- CONTACT ---------- */
+      const contact = parseContact(t);   // returns undefined if none
 
-      const clinic: Clinic = {
-        id: `overpass-${element.id || index}`,
-        type,
-        name,
-        isOpen,
-        distance: 'N/A', // This would need to be calculated based on user location
-        closingTime,
-        estimatedWaitTime: 'N/A', // We don't have this data from Overpass
-      };
-
-      if (element.lat !== undefined && element.lon !== undefined) {
-        clinic.location = {
-          lat: element.lat,
-          lng: element.lon
-        };
-      } else if (element.type === 'way' && element.nodes && element.nodes.length > 0) {
-        let validNodes = element.nodes
-          .map((nodeId: string | number) => nodeMap[nodeId])
-          .filter((node: any) => node);
-
-        if (validNodes.length > 0) {
-          const sumLat = validNodes.reduce((sum: number, node: any) => sum + node.lat, 0);
-          const sumLon = validNodes.reduce((sum: number, node: any) => sum + node.lon, 0);
-
-          clinic.location = {
-            lat: sumLat / validNodes.length,
-            lng: sumLon / validNodes.length
-          };
+      /* ---------- LOCATION ---------- */
+      let lat = el.lat, lng = el.lon;
+      if (lat == null && el.nodes?.length) {
+        const pts = el.nodes.map((n: string) => nodeMap[n]).filter(Boolean);
+        if (pts.length) {
+          lat = pts.reduce((s, p) => s + p.lat, 0) / pts.length;
+          lng = pts.reduce((s, p) => s + p.lon, 0) / pts.length;
         }
       }
 
-      return clinic;
+      return {
+        id,
+        type,
+        name,
+        isOpen: true,
+        distance: "N/A",
+        closingTime: hours ?? "Unknown",
+        estimatedWaitTime: "N/A",
+
+        /* NEW FIELDS */
+        services,
+        hours,
+        contact,
+
+        location: lat != null ? { lat, lng } : undefined,
+      } as Clinic;
     });
 }

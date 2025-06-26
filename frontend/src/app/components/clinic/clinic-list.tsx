@@ -54,9 +54,10 @@ function ClinicList() {
                 {loading ? (
                     <ScrollArea>
                         <Stack mr="sm">
-                            {/* Display 3 skeleton cards while loading */}
+
+                           {/* Display 3 skeleton cards while loading */}
                             {Array(3).fill(0).map((_, index) => (
-                                <ClinicCardSkeleton key={index}/>
+                               <ClinicCardSkeleton key={index}/>
                             ))}
                         </Stack>
                     </ScrollArea>

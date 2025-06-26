@@ -1,77 +1,75 @@
-import {Badge, Button, Card, Group, Skeleton, Stack, Text} from '@mantine/core';
-import {Clinic} from '@models/clinic';
+"use client";
 
-interface ClinicCardProps {
-    clinic: Clinic;
-}
+import React from 'react';
+import { Badge, Button, Card, Text, Skeleton } from '@mantine/core';
+import { Clinic } from '@/models/clinic';
 
+/* optional skeleton */
 export function ClinicCardSkeleton() {
-    return (
-        <Card shadow="sm" padding="lg" radius="md" miw={400} withBorder>
-            <Card.Section>
-                <Group justify="flex-start" align="center" p="md">
-                    <Skeleton height={20} width={62} radius="sm"/>
-                    <Skeleton height={20} width={62} radius="sm"/>
-                </Group>
-            </Card.Section>
-
-            <Group justify="space-between" mb="xs">
-                <Skeleton height={25} width={150} radius="sm"/>
-                <Skeleton height={20} width={42} radius="sm"/>
-            </Group>
-            <Stack gap="0">
-                <Skeleton height={24} width="70%" radius="sm"/>
-                <Skeleton height={24} width="60%" radius="sm"/>
-            </Stack>
-            <Group>
-                <Skeleton height={36} width={100} mt="md" radius="md"/>
-                <Skeleton height={36} width={100} mt="md" radius="md"/>
-                <Skeleton height={36} width={100} mt="md" radius="md"/>
-            </Group>
-        </Card>
-    );
+  return (
+    <Card shadow="sm" p="lg" radius="md" withBorder>
+      <Skeleton height={16} width="40%" mb="sm" />
+      <Skeleton height={14} width="70%" mb="xs" />
+      <Skeleton height={80} />
+    </Card>
+  );
 }
 
-function ClinicCard({clinic}: ClinicCardProps) {
-    return (
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-            <Card.Section>
-                <Group justify="flex-start" align="center" p="md">
-                    <Badge color="blue" variant="light">
-                        <Text size="xs" c="dimmed">
-                            {clinic.type}
-                        </Text>
-                    </Badge>
-                    <Badge color={clinic.isOpen ? "green" : "red"} variant="light">
-                        <Text size="xs" c="dimmed">
-                            {clinic.isOpen ? "OPEN" : "CLOSED"}
-                        </Text>
-                    </Badge>
-                </Group>
-            </Card.Section>
+export default function ClinicCard({ clinic }: { clinic: Clinic }) {
+  // choose badge colour from estimatedWaitTime
+  const num = parseInt(clinic.estimatedWaitTime); // crude parse “30m” → 30
+  const colour =
+    isNaN(num)   ? 'gray'  :
+    num < 15     ? 'green' :
+    num < 30     ? 'yellow': 'red';
 
-            <Group justify="space-between" mb="xs">
-                <Text fw={500}>{clinic.name}</Text>
-                <Badge color="pink">{clinic.estimatedWaitTime}</Badge>
-            </Group>
-            <Stack gap="0">
-                <Text>Distance: {clinic.distance}</Text>
-                <Text>Closing time: {clinic.closingTime}</Text>
-            </Stack>
-            <Group>
-                <Button color="blue" mt="md" radius="md">
-                    Directions
-                </Button>
-                <Button color="blue" mt="md" radius="md">
-                    Website
-                </Button>
-                <Button color="blue" mt="md" radius="md">
-                    More info
-                </Button>
-            </Group>
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinic.location.lat},${clinic.location.lng}`;
 
-        </Card>
-    );
+  return (
+    <Card shadow="sm" p="lg" radius="md" withBorder mb="md">
+      {/* header badges */}
+      <div style={{ display: 'flex', gap: 6 }}>
+        <Badge>{clinic.type}</Badge>
+        <Badge color={clinic.isOpen ? 'green' : 'red'}>
+          {clinic.isOpen ? 'OPEN' : 'CLOSED'}
+        </Badge>
+      </div>
+
+      {/* name + wait */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', margin: '6px 0 8px' }}>
+        <Text fw={600}>{clinic.name}</Text>
+        <Badge color={colour}>{clinic.estimatedWaitTime}</Badge>
+      </div>
+
+      <Text size="sm" mb={4}>Distance: {clinic.distance}</Text>
+      <Text size="sm" mb={4}>Closes: {clinic.closingTime}</Text>
+
+      {/* NEW INFO */}
+      {clinic.services && (
+        <Text size="sm" mb={4}>
+          <b>Services:</b> {clinic.services.join(', ')}
+        </Text>
+      )}
+
+      {clinic.hours && (
+        <Text size="sm" mb={4}>
+          <b>Hours:</b> {clinic.hours}
+        </Text>
+      )}
+
+      {clinic.contact && (
+        <Text size="sm" mb={4}>
+          {clinic.contact.phone && <>📞 {clinic.contact.phone}<br/></>}
+          {clinic.contact.email && <>✉️ {clinic.contact.email}<br/></>}
+        </Text>
+      )}
+
+      {/* actions */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <Button size="xs" component="a" href={mapsUrl} target="_blank">
+          Directions
+        </Button>
+      </div>
+    </Card>
+  );
 }
-
-export default ClinicCard;
