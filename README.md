@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Feature 19 – Additional Clinic Information Display
 
-## Getting Started
+**Branch:** `Feature-Frontend-Additional-display-info`  
+**PR:** _TBD_
 
-First, run the development server:
+## What’s new
+| UI element | Summary |
+|------------|---------|
+| **Services List** | Each card shows `services` (comma-separated) when present. |
+| **Operating Hours** | Displays `hours` (tag `opening_hours` or mock field). |
+| **Contact Info** | Renders phone 📞 and email ✉️ if either tag exists. |
+| **Directions Button** | Opens Google Maps directions to the clinic location. |
 
+## Key files touched
+| Path | Purpose |
+|------|---------|
+| `components/clinic/clinic-card.tsx` | Added Services, Hours, Contact sections and “Directions” button. |
+| `components/clinic/clinic-map.tsx`  | No change; still shows markers but inherits richer pop-up if desired. |
+| `context/clinic-context.tsx`        | Enriches fetched facilities with defaults; prevents UI flicker. |
+| `data/mock-clinics.ts`              | Mock dataset now includes `services`, `hours`, `contact`. |
+| `models/clinic.ts`                  | Optional fields added to model. |
+
+## Where data comes from
+1. **Mock mode** · `src/app/data/mock-clinics.ts` – used immediately on first render or when Overpass fails.  
+2. **Live mode** · `fetchMedicalFacilities()` in `services/overpass-api.ts`  
+   - We request extra tags: `opening_hours`, `phone`, `email`, `healthcare:speciality`.  
+   - Any missing fields are enriched in `clinic-context.tsx` with sensible defaults so UI never breaks.
+
+## To render properly
+| Requirement | Action |
+|-------------|--------|
+| **Opening hours / contact** | Must exist on the OSM node/way (tags `opening_hours`, `phone`, `email`). If absent, UI shows “Hours: N/A” and hides phone/email. |
+| **Services** | Parsed from `healthcare:speciality=*` or fallback to “General Service”. |
+| **Directions button** | Works out-of-box; uses clinic `location.lat/lng` to open Google Maps. |
+| **No flicker** | Provider starts with `loading=true`, shows skeletons until Overpass data (already enriched) replaces mock. |
+
+## Local testing
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# open http://localhost:3000
