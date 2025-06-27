@@ -1,99 +1,131 @@
-'use client';
+"use client";
 
-import React, {useEffect} from 'react';
+import React, { useEffect } from "react";
 import "leaflet/dist/leaflet.css";
-import {MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents} from "react-leaflet";
-import {useClinicContext} from '@/context/clinic-context';
-import {Icon} from "leaflet";
+import {
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+import { useClinicContext } from "@/context/clinic-context";
+import { Icon } from "leaflet";
 
+// Existing clinic pin
+const clinicIcon = new Icon({
+  iconUrl: "/assets/map_icon.png",
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+});
+
+// “You are here” pin, using the blue marker images
+const userIcon = new Icon({
+  iconUrl: "/assets/marker-icon-2x-blue.png",
+  shadowUrl: "/assets/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
 
 function MapEventHandler() {
-    const {updateMapBounds} = useClinicContext();
-    const map = useMap();
+  const { updateMapBounds } = useClinicContext();
+  const map = useMap();
 
-    useMapEvents({
-        moveend: () => {
-            const bounds = map.getBounds();
-            const southWest = bounds.getSouthWest();
-            const northEast = bounds.getNorthEast();
+  useMapEvents({
+    moveend: () => {
+      const bounds = map.getBounds();
+      const southWest = bounds.getSouthWest();
+      const northEast = bounds.getNorthEast();
 
-            // Format: [south, west, north, east]
-            updateMapBounds([
-                southWest.lat,
-                southWest.lng,
-                northEast.lat,
-                northEast.lng
-            ]);
-        }
-    });
+      // Format: [south, west, north, east]
+      updateMapBounds([
+        southWest.lat,
+        southWest.lng,
+        northEast.lat,
+        northEast.lng,
+      ]);
+    },
+  });
 
-    useEffect(() => {
-        const bounds = map.getBounds();
-        const southWest = bounds.getSouthWest();
-        const northEast = bounds.getNorthEast();
+  useEffect(() => {
+    const bounds = map.getBounds();
+    const southWest = bounds.getSouthWest();
+    const northEast = bounds.getNorthEast();
 
-        updateMapBounds([
-            southWest.lat,
-            southWest.lng,
-            northEast.lat,
-            northEast.lng
-        ]);
-    }, [map, updateMapBounds]);
+    updateMapBounds([
+      southWest.lat,
+      southWest.lng,
+      northEast.lat,
+      northEast.lng,
+    ]);
+  }, [map, updateMapBounds]);
 
-    return null;
+  return null;
 }
 
 function ClinicMap() {
-    const {clinics} = useClinicContext();
+  const { clinics, userLocation } = useClinicContext();
 
-    // Default center for Toronto
-    const defaultCenter = [43.6532, -79.3832];
+  // Default center for Toronto
+  const defaultCenter = [43.6532, -79.3832];
 
-    const markerIcon = new Icon({
-        iconUrl: '/assets/map_icon.png',
-        iconSize: [32, 32]
-    })
-    return (
-        <>
-            <MapContainer
-                center={defaultCenter as [number, number]}
-                zoom={13}
-                scrollWheelZoom={true}
-                style={{height: '80vh', width: '60vw'}}
-            >
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
+  const markerIcon = new Icon({
+    iconUrl: "/assets/map_icon.png",
+    iconSize: [32, 32],
+  });
+  return (
+    <>
+      <MapContainer
+        center={defaultCenter as [number, number]}
+        zoom={13}
+        scrollWheelZoom={true}
+        style={{ height: "80vh", width: "60vw" }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-                {/* Add markers for each clinic */}
-                {clinics.map(clinic => (
-                    <Marker
-                        icon={markerIcon}
-                        key={clinic.id}
-                        position={
-                            clinic.location
-                                ? [clinic.location.lat, clinic.location.lng]
-                                : defaultCenter as [number, number]
-                        }
-                    >
-                        <Popup>
-                            <div>
-                                <h3>{clinic.name}</h3>
-                                <p>Type: {clinic.type}</p>
-                                <p>Status: {clinic.isOpen ? 'Open' : 'Closed'}</p>
-                                <p>Closing Time: {clinic.closingTime}</p>
-                                <p>Wait Time: {clinic.estimatedWaitTime}</p>
-                            </div>
-                        </Popup>
-                    </Marker>
-                ))}
+        {/* Add markers for each clinic */}
+        {clinics.map((clinic) => (
+          <Marker
+            icon={markerIcon}
+            key={clinic.id}
+            position={
+              clinic.location
+                ? [clinic.location.lat, clinic.location.lng]
+                : (defaultCenter as [number, number])
+            }
+          >
+            <Popup>
+              <div>
+                <h3>{clinic.name}</h3>
+                <p>Type: {clinic.type}</p>
+                <p>Status: {clinic.isOpen ? "Open" : "Closed"}</p>
+                <p>Closing Time: {clinic.closingTime}</p>
+                <p>Wait Time: {clinic.estimatedWaitTime}</p>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
 
-                {/* Component to handle map events */}
-                <MapEventHandler/>
-            </MapContainer>
-        </>
-    );
+        {/* “You are here” marker */}
+        {userLocation && (
+          <Marker
+            position={[userLocation.lat, userLocation.lng]}
+            icon={userIcon}
+          >
+            <Popup>You are here</Popup>
+          </Marker>
+        )}
+
+        {/* Component to handle map events */}
+        <MapEventHandler />
+      </MapContainer>
+    </>
+  );
 }
 
 export default ClinicMap;
