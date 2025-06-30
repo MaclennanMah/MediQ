@@ -64,6 +64,11 @@
   z-index: 1;
 }
 
+.leaflet-tile-container img {
+  max-width: none !important;
+  max-height: none !important;
+}
+
 .main-container {
   display: flex;
   width: 100%;
@@ -76,10 +81,11 @@
   height: 100%;
   overflow: hidden;
   padding: 16px;
+  flex-shrink: 0;
 }
 
 .map-container {
   flex: 1;
   height: 100%;
-  padding: 16px;
+  position: relative;
 }
