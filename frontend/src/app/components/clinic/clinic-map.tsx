@@ -12,6 +12,7 @@ import {
 } from "react-leaflet";
 import { useClinicContext } from "@/context/clinic-context";
 import { Icon } from "leaflet";
+import { useMantineColorScheme } from '@mantine/core';
 
 // Existing clinic pin
 const clinicIcon = new Icon({
@@ -67,6 +68,7 @@ function MapEventHandler() {
 
 function ClinicMap() {
   const { clinics, userLocation } = useClinicContext();
+  const { colorScheme } = useMantineColorScheme();
 
   // Default center for Toronto
   const defaultCenter = [43.6532, -79.3832];
@@ -83,9 +85,14 @@ function ClinicMap() {
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        <TileLayer // using Stadia Alidade Smooth style
+            attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
+            url={
+              colorScheme === 'dark'
+                  ? "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+                  : "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+            }
+            key={colorScheme}
         />
 
         {/* Add markers for each clinic */}
