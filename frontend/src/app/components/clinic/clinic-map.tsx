@@ -57,6 +57,24 @@ function MapEventHandler() {
   return null;
 }
 
+function AutoCenterOnUser() {
+  const { userLocation } = useClinicContext();
+  const map = useMap();
+  const [hasAutocentered, setHasAutocentered] = useState(false);
+
+  useEffect(() => {
+    // only auto-center once when user location is available
+    if (userLocation && !hasAutocentered) {
+      map.flyTo([userLocation.lat, userLocation.lng], 15, {
+        duration: 1.5
+      });
+      setHasAutocentered(true);
+    }
+  }, [userLocation, map, hasAutocentered]);
+
+  return null;
+}
+
 function ClinicMap() {
   const { clinics, userLocation } = useClinicContext();
   const { colorScheme } = useMantineColorScheme();
@@ -160,6 +178,7 @@ function ClinicMap() {
 
         {/* Component to handle map events */}
         <MapEventHandler />
+        <AutoCenterOnUser />
         <GeolocationControl />
       </MapContainer>
     </>
