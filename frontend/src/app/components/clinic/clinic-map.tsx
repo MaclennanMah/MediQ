@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, {useEffect, useState} from "react";
 import "leaflet/dist/leaflet.css";
 import {
   MapContainer,
@@ -13,22 +13,12 @@ import {
 import { useClinicContext } from "@/context/clinic-context";
 import { Icon } from "leaflet";
 import { useMantineColorScheme } from '@mantine/core';
-
-// Existing clinic pin
-const clinicIcon = new Icon({
-  iconUrl: "/assets/map_icon.png",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-});
-
-// “You are here” pin, using the blue marker images
-const userIcon = new Icon({
-  iconUrl: "/assets/marker-icon-2x-blue.png",
-  shadowUrl: "/assets/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
+import { createTablerIcon } from "@utils/map-icons";
+import {
+  IconMapPinFilled,
+  IconFlag3Filled,
+  IconUserFilled
+} from "@tabler/icons-react";
 
 function MapEventHandler() {
   const { updateMapBounds } = useClinicContext();
@@ -73,10 +63,43 @@ function ClinicMap() {
   // Default center for Toronto
   const defaultCenter = [43.6532, -79.3832];
 
-  const markerIcon = new Icon({
-    iconUrl: "/assets/map_icon.png",
-    iconSize: [32, 32],
-  });
+  // !! map icons !!
+  const [selectedClinic, setSelectedClinic] = useState<string | null>(null);
+
+  // theme colors
+  const colors = {
+    primary: colorScheme === 'dark' ? '#74b9ff' : '#3388ff',
+    selected: colorScheme === 'dark' ? '#ff6b6b' : '#ff0000',
+    user: colorScheme === 'dark' ? '#9dffb5' : '#00b894'
+  };
+
+  // create map icons
+  const clinicIcon = createTablerIcon(
+    <IconMapPinFilled
+        size={32}
+        color={colors.primary}
+        strokeWidth={2}
+    />,
+      32, 16, 32
+  );
+
+  const selectedIcon = createTablerIcon(
+    <IconFlag3Filled
+        size={40}
+        color={colors.selected}
+    />,
+    40, 20, 40
+  );
+
+  const userLocationIcon = createTablerIcon(
+    <IconUserFilled
+        size={36}
+        color={colors.user}
+        strokeWidth={1.5}
+    />,
+    36, 18, 36
+  );
+
   return (
     <>
       <MapContainer
@@ -98,13 +121,19 @@ function ClinicMap() {
         {/* Add markers for each clinic */}
         {clinics.map((clinic) => (
           <Marker
-            icon={markerIcon}
+            // icon={markerIcon}
             key={clinic.id}
             position={
               clinic.location
                 ? [clinic.location.lat, clinic.location.lng]
                 : (defaultCenter as [number, number])
             }
+            icon={selectedClinic === clinic.id ? selectedIcon : clinicIcon}
+            eventHandlers={{
+              click: () => {
+                setSelectedClinic(clinic.id);
+              },
+            }}
           >
             <Popup>
               <div>
@@ -122,7 +151,7 @@ function ClinicMap() {
         {userLocation && (
           <Marker
             position={[userLocation.lat, userLocation.lng]}
-            icon={userIcon}
+            icon={userLocationIcon}
           >
             <Popup>You are here</Popup>
           </Marker>
