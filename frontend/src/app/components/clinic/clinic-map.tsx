@@ -19,6 +19,7 @@ import {
   IconFlag3Filled,
   IconUserFilled
 } from "@tabler/icons-react";
+import { GeolocationControl } from './geolocation-control';
 
 function MapEventHandler() {
   const { updateMapBounds } = useClinicContext();
@@ -159,6 +160,7 @@ function ClinicMap() {
 
         {/* Component to handle map events */}
         <MapEventHandler />
+        <GeolocationControl />
       </MapContainer>
     </>
   );

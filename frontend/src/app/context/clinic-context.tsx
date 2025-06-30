@@ -13,13 +13,19 @@ import { fetchMedicalFacilities } from "@/services/overpass-api";
 import { mockClinics } from "@/data/mock-clinics";
 import { haversineDistance } from "@/utils/distance";
 
+interface UserLocation {
+  lat: number;
+  lng: number;
+  accuracy?: number;
+}
+
 interface ClinicContextType {
   clinics: Clinic[];
   loading: boolean;
   error: string | null;
   updateMapBounds: (bounds: [number, number, number, number]) => void;
   currentBounds: [number, number, number, number] | null;
-  userLocation: { lat: number; lng: number } | null;
+  userLocation: UserLocation | null;
 }
 
 const ClinicContext = createContext<ClinicContextType>({
@@ -45,17 +51,15 @@ export const ClinicProvider: React.FC<ClinicProviderProps> = ({ children }) => {
   const [currentBounds, setCurrentBounds] = useState<
     [number, number, number, number] | null
   >(null);
-  const [userLocation, setUserLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
+
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
 
   // 1) Watch user position
   useEffect(() => {
     if (!navigator.geolocation) return;
     const watcherId = navigator.geolocation.watchPosition(
       ({ coords }) =>
-        setUserLocation({ lat: coords.latitude, lng: coords.longitude }),
+        setUserLocation({ lat: coords.latitude, lng: coords.longitude, accuracy:coords.accuracy }),
       (err) => {
         console.error("Geolocation error:", err);
         setUserLocation(null);
