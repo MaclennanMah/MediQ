@@ -81,7 +81,7 @@ function ClinicMap() {
         center={defaultCenter as [number, number]}
         zoom={13}
         scrollWheelZoom={true}
-        style={{ height: "80vh", width: "60vw" }}
+        style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
