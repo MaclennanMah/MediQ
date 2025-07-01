@@ -87,7 +87,7 @@ function ClinicMap() {
 
   // theme colors
   const colors = {
-    primary: colorScheme === 'dark' ? '#74b9ff' : '#3388ff',
+    primary: colorScheme === 'dark' ? '#74b9ff' : '#005BA9',
     selected: colorScheme === 'dark' ? '#ff6b6b' : '#ff0000',
     user: colorScheme === 'dark' ? '#9dffb5' : '#00b894'
   };

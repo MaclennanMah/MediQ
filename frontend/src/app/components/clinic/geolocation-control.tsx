@@ -32,15 +32,12 @@ export function GeolocationControl() {
                 button.innerHTML = iconHtml;
 
                 // style the button
-                button.style.width = '30px';
-                button.style.height = '30px';
-                button.style.display = 'flex';
-                button.style.alignItems = 'center';
-                button.style.justifyContent = 'center';
-                button.style.textDecoration = 'none';
-                button.style.backgroundColor = colorScheme === 'dark' ? '#2d3748' : 'white';
-                button.style.color = iconColor;
-                button.style.borderRadius = '4px';
+                button.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-decoration: none;
+                `;
 
                 // handle click event
                 const handleClick = (e: Event) => {
