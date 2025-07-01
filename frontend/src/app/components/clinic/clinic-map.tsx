@@ -11,7 +11,6 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import { useClinicContext } from "@/context/clinic-context";
-import { Icon } from "leaflet";
 import { useMantineColorScheme } from '@mantine/core';
 import { createTablerIcon } from "@utils/map-icons";
 import {

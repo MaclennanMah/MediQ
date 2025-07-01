@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "@mantine/core/styles.css";
-
 /* ===== BASE STYLES ===== */
 * {
   box-sizing: border-box;

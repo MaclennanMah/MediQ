@@ -1,10 +1,10 @@
 "use client";
-import { useMap } from "react-leaflet";
+import {useMap} from "react-leaflet";
 import L from "leaflet";
-import { useEffect, useRef } from "react";
-import { IconCurrentLocation } from "@tabler/icons-react";
-import { useMantineColorScheme } from "@mantine/core";
-import { renderToString } from "react-dom/server";
+import {useEffect, useRef} from "react";
+import {IconCurrentLocation} from "@tabler/icons-react";
+import {useMantineColorScheme} from "@mantine/core";
+import {renderToString} from "react-dom/server";
 
 export function GeolocationControl() {
     const map = useMap();
@@ -26,10 +26,9 @@ export function GeolocationControl() {
 
                 // add icon using renderToString
                 const iconColor = colorScheme === 'dark' ? '#9dffb5' : '#00b894';
-                const iconHtml = renderToString(
-                    <IconCurrentLocation size={18} color={iconColor} />
+                button.innerHTML = renderToString(
+                    <IconCurrentLocation size={18} color={iconColor}/>
                 );
-                button.innerHTML = iconHtml;
 
                 // style the button
                 button.style.cssText = `
