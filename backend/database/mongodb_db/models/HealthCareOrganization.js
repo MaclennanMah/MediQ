@@ -13,7 +13,21 @@ const healthcareOrganizationSchema = new mongoose.Schema(
       trim: true
     },
     // New field for the live estimate (in minutes)
-    estimatedWaitTime: { type: Number, default: null }
+    estimatedWaitTime: { type: Number, default: null },
+    // Geocoded location for spatial queries
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number],      // [ longitude, latitude ]
+        required: true,
+        index: '2dsphere'
+      }
+    }
+    
   },
   {
     timestamps: true,
