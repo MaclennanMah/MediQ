@@ -28,6 +28,40 @@ router.get('/', async (req, res) => {
 })
 
 /**
+ * GET /organizations/search/near?lat=XXX&lng=ZZZ
+ * --> Finds the organizations nearby based on latitude and longitude. If the 'max' key is not
+ *     inputted, it automatically is set to 10000 (which means 10 km). 
+ */
+router.get('/search/near', async (req, res) => {
+  const { lat, lng, max = 10000 } = req.query;
+  const latitude  = parseFloat(lat);
+  const longitude = parseFloat(lng);
+  if (isNaN(latitude) || isNaN(longitude)) {
+    return res.status(400).json({ error: 'Invalid lat or lng' });
+  }
+
+  // parse and validate maxDistance
+  const maxDistanceMeters = parseInt(max, 10) || 10000;
+  if (isNaN(maxDistanceMeters) || maxDistanceMeters <= 0) {
+    return res.status(400).json({ error: 'maxDistance must be a positive integer (in meters)' });
+  }
+
+  const nearby = await HealthcareOrganization.find({
+    location: {
+      $near: {
+        $geometry: {
+          type: 'Point',
+          coordinates: [longitude, latitude]
+        },
+        $maxDistance: maxDistanceMeters  // in meters
+      }
+    }
+  }).lean();
+
+  res.json(nearby);
+});
+
+/**
  * GET /organizations/orgID
  * --> This route returns the data of a healthcare organization using its id
  */
@@ -58,13 +92,13 @@ router.get('/:orgID', async (req, res) => {
     }
 })
 
+
 /**
  * POST /organizations/
  * --> This route adds a single organization to the database
  */
-router.post('/', async (req, res) => {
-    console.log('HEADERS', req.headers)
-    console.log('BODY', req.body)
+router.post('/', async (req, res) => { 
+
     // First get the authorization header
     const authorization = req.headers.authorization
     

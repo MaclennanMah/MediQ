@@ -34,6 +34,9 @@ const healthcareOrganizationSchema = new mongoose.Schema(
   }
 );
 
+// Add index
+healthcareOrganizationSchema.index({location: '2dsphere'})
+
 // Third argument ('healthcare_organizations') forces the collection name in MongoDB.
 const HealthcareOrganization = mongoose.model(
   'HealthcareOrganization',
