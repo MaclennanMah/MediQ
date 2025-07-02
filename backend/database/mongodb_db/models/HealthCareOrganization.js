@@ -22,7 +22,7 @@ const healthcareOrganizationSchema = new mongoose.Schema(
         default: 'Point'
       },
       coordinates: {
-        type: [Number],      // [ longitude, latitude ]
+        type: [Number],      // [ latitude, longitude ]
         required: true,
         index: '2dsphere'
       }

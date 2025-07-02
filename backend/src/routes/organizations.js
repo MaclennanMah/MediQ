@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import HealthcareOrganization from '../../database/mongodb_db/models/HealthCareOrganization.js';
+import geo from '../../services/geocoder.js';
 
 // Set router
 const router = express.Router();
@@ -62,6 +63,8 @@ router.get('/:orgID', async (req, res) => {
  * --> This route adds a single organization to the database
  */
 router.post('/', async (req, res) => {
+    console.log('HEADERS', req.headers)
+    console.log('BODY', req.body)
     // First get the authorization header
     const authorization = req.headers.authorization
     
@@ -78,16 +81,41 @@ router.post('/', async (req, res) => {
         return res.status(401).json({message: 'Invalid Authorization token'})
     }
     
+    const { organizationName, address, phoneNumber, organizationType } = req.body || {};
+    if (!organizationName?.trim() || !address?.trim() || !organizationType) {
+        return res
+        .status(400)
+        .json({ message: 'organizationName, address and organizationType are required' });
+    }
+    console.log('Now moving onto geo coder')
     try {
-         // Get the data from the req.json
-        const newOrganization = await HealthcareOrganization.create(req.body)
-        return res.status(201).json({message: 'Successfully created new organization'})
+        // Here we geo code
+        const [geoRes] = await geo.geocode(address)
+        console.log(geoRes)
+
+        if (!geoRes || typeof geoRes.latitude !== 'number') {
+            return res.status(400).json({message: 'Unable to geocode address. Invalid address.'})
+        }
+
+        // Create new organization
+        const newOrganization = await HealthcareOrganization.create({
+            organizationName: organizationName.trim(),
+            address: address.trim(),
+            phoneNumber: phoneNumber || null,
+            organizationType,
+            location: {
+                type: 'Point',
+                coordinates: [geoRes.latitude, geoRes.longitude]
+            }
+        })
+
+        return res.status(201).json({message: `Successfully created new organization. ${newOrganization}`})
     }
     catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ error: error.message });
         }
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' + error});
     }   
 })
 
