@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, {useEffect, useState} from "react";
 import "leaflet/dist/leaflet.css";
 import {
   MapContainer,
@@ -11,23 +11,14 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import { useClinicContext } from "@/context/clinic-context";
-import { Icon } from "leaflet";
-
-// Existing clinic pin
-const clinicIcon = new Icon({
-  iconUrl: "/assets/map_icon.png",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-});
-
-// “You are here” pin, using the blue marker images
-const userIcon = new Icon({
-  iconUrl: "/assets/marker-icon-2x-blue.png",
-  shadowUrl: "/assets/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
+import { useMantineColorScheme } from '@mantine/core';
+import { createTablerIcon } from "@utils/map-icons";
+import {
+  IconMapPinFilled,
+  IconFlag3Filled,
+  IconUserFilled
+} from "@tabler/icons-react";
+import { GeolocationControl } from './geolocation-control';
 
 function MapEventHandler() {
   const { updateMapBounds } = useClinicContext();
@@ -65,39 +56,102 @@ function MapEventHandler() {
   return null;
 }
 
+function AutoCenterOnUser() {
+  const { userLocation } = useClinicContext();
+  const map = useMap();
+  const [hasAutocentered, setHasAutocentered] = useState(false);
+
+  useEffect(() => {
+    // only auto-center once when user location is available
+    if (userLocation && !hasAutocentered) {
+      map.flyTo([userLocation.lat, userLocation.lng], 15, {
+        duration: 1.5
+      });
+      setHasAutocentered(true);
+    }
+  }, [userLocation, map, hasAutocentered]);
+
+  return null;
+}
+
 function ClinicMap() {
   const { clinics, userLocation } = useClinicContext();
+  const { colorScheme } = useMantineColorScheme();
 
   // Default center for Toronto
   const defaultCenter = [43.6532, -79.3832];
 
-  const markerIcon = new Icon({
-    iconUrl: "/assets/map_icon.png",
-    iconSize: [32, 32],
-  });
+  // !! map icons !!
+  const [selectedClinic, setSelectedClinic] = useState<string | null>(null);
+
+  // theme colors
+  const colors = {
+    primary: colorScheme === 'dark' ? '#74b9ff' : '#005BA9',
+    selected: colorScheme === 'dark' ? '#ff6b6b' : '#ff0000',
+    user: colorScheme === 'dark' ? '#9dffb5' : '#00b894'
+  };
+
+  // create map icons
+  const clinicIcon = createTablerIcon(
+    <IconMapPinFilled
+        size={32}
+        color={colors.primary}
+        strokeWidth={2}
+    />,
+      32, 16, 32
+  );
+
+  const selectedIcon = createTablerIcon(
+    <IconFlag3Filled
+        size={40}
+        color={colors.selected}
+    />,
+    40, 20, 40
+  );
+
+  const userLocationIcon = createTablerIcon(
+    <IconUserFilled
+        size={36}
+        color={colors.user}
+        strokeWidth={1.5}
+    />,
+    36, 18, 36
+  );
+
   return (
     <>
       <MapContainer
         center={defaultCenter as [number, number]}
         zoom={13}
         scrollWheelZoom={true}
-        style={{ height: "80vh", width: "60vw" }}
+        style={{ height: "100%", width: "100%" }}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        <TileLayer // using Stadia Alidade Smooth style
+            attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
+            url={
+              colorScheme === 'dark'
+                  ? "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+                  : "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+            }
+            key={colorScheme}
         />
 
         {/* Add markers for each clinic */}
         {clinics.map((clinic) => (
           <Marker
-            icon={markerIcon}
+            // icon={markerIcon}
             key={clinic.id}
             position={
               clinic.location
                 ? [clinic.location.lat, clinic.location.lng]
                 : (defaultCenter as [number, number])
             }
+            icon={selectedClinic === clinic.id ? selectedIcon : clinicIcon}
+            eventHandlers={{
+              click: () => {
+                setSelectedClinic(clinic.id);
+              },
+            }}
           >
             <Popup>
               <div>
@@ -115,7 +169,7 @@ function ClinicMap() {
         {userLocation && (
           <Marker
             position={[userLocation.lat, userLocation.lng]}
-            icon={userIcon}
+            icon={userLocationIcon}
           >
             <Popup>You are here</Popup>
           </Marker>
@@ -123,6 +177,8 @@ function ClinicMap() {
 
         {/* Component to handle map events */}
         <MapEventHandler />
+        <AutoCenterOnUser />
+        <GeolocationControl />
       </MapContainer>
     </>
   );
