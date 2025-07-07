@@ -64,7 +64,7 @@ function ClinicCard({ clinic }: ClinicCardProps) {
       </Card.Section>
 
       <Group justify="space-between" mb="xs">
-        <Text fw={500}>{clinic.name}</Text>
+        <Text className="montserrat-bold" fz="lg">{clinic.name}</Text>
         <Badge color="pink">{clinic.estimatedWaitTime}</Badge>
       </Group>
       <Stack gap="0">
