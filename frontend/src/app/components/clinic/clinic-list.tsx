@@ -27,7 +27,7 @@ export default function ClinicList() {
 
   return (
     <>
-      <Stack h="90vh" maw={436} mx="auto">
+      <Stack h="90vh" maw={450} mx="auto">
         <Input
           placeholder="Enter address to find nearest location"
           rightSectionPointerEvents="all"
