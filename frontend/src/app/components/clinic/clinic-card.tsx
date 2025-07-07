@@ -8,7 +8,7 @@ import {
   Text,
 } from "@mantine/core";
 import { Clinic } from "@models/clinic";
-import { IconMapPin2, IconHourglassEmpty, IconInfoCircle } from "@tabler/icons-react";
+import { IconMapPin2, IconHourglassEmpty, IconInfoCircle, IconClockHour2, IconUserPin } from "@tabler/icons-react";
 
 interface ClinicCardProps {
   clinic: Clinic;
@@ -79,11 +79,18 @@ function ClinicCard({ clinic }: ClinicCardProps) {
             {clinic.estimatedWaitTime}
         </Badge>
       </Group>
-      <Stack gap="0">
-        <Text>
-          {distanceKm ? `Distance: ${distanceKm} km away` : "Distance: unknown"}
-        </Text>
-        <Text>Closing time: {clinic.closingTime}</Text>
+      <Stack gap={2}>
+          <Group gap="xs">
+              <IconUserPin size={16} />
+              <Text
+                  size ="sm">
+                  {distanceKm ? `${distanceKm} km away from you` : "Distance: unknown"}
+              </Text>
+          </Group>
+          <Group gap="xs">
+              <IconClockHour2 size={16} />
+              <Text size ="sm"> Closes at {clinic.closingTime}</Text>
+          </Group>
       </Stack>
       <Group justify="center" mt="md">
         <Button color="blue"  radius="md" h={60} w={125}>
