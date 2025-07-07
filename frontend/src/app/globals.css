@@ -23,6 +23,11 @@
   font-weight: 600;
 }
 
+.montserrat-med{
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+}
+
 .open-sans-lt {
   font-family: "Open Sans", sans-serif;
   font-weight: 300;
