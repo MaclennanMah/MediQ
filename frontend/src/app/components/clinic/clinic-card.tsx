@@ -15,7 +15,7 @@ interface ClinicCardProps {
 
 export function ClinicCardSkeleton() {
   return (
-    <Card shadow="sm" padding="lg" radius="md" miw={400} withBorder>
+    <Card shadow="sm" padding="lg" radius="md" miw={436} withBorder>
       <Card.Section>
         <Group justify="flex-start" align="center" p="md">
           <Skeleton height={20} width={62} radius="sm" />
@@ -46,7 +46,7 @@ function ClinicCard({ clinic }: ClinicCardProps) {
     clinic.distance != null ? (clinic.distance / 1000).toFixed(2) : null;
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder>
+    <Card shadow="sm" padding="lg" radius="md" miw={436} withBorder>
       <Card.Section>
         <Group justify="flex-start" align="center" p="md">
           <Badge color="blue" variant="light">
