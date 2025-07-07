@@ -64,8 +64,20 @@ function ClinicCard({ clinic }: ClinicCardProps) {
       </Card.Section>
 
       <Group justify="space-between" mb="xs">
-        <Text className="montserrat-bold" fz="lg">{clinic.name}</Text>
-        <Badge color="pink">{clinic.estimatedWaitTime}</Badge>
+        <Text
+            className="montserrat-bold"
+            fz="lg"
+            style={{flex:1, midWidth:0}}
+            lineClamp={2}
+        >
+            {clinic.name}
+        </Text>
+        <Badge
+            color="pink"
+            style={{ flexShrink: 0, alignSelf: "center" }}
+        >
+            {clinic.estimatedWaitTime}
+        </Badge>
       </Group>
       <Stack gap="0">
         <Text>
