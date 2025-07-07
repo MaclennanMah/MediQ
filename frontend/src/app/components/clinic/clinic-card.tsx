@@ -98,22 +98,37 @@ function ClinicCard({ clinic }: ClinicCardProps) {
 
             {/*Buttons*/}
             <Group justify="center" mt="md">
-                <Button color="blue"  radius="md" h={60} w={125}>
+                <Button color="blue"  radius="md" h={60} w={125} p="xs">
                     <Stack gap={4} align="center">
                         <IconMapPin2 size={20} />
-                        <Text size="sm">Directions</Text>
+                        <Text
+                            className="montserrat-med"
+                            size="xs"
+                        >
+                            DIRECTIONS
+                        </Text>
                     </Stack>
                 </Button>
-                <Button color="blue" radius="md" h={60} w={125}>
+                <Button color="blue" radius="md" h={60} w={125} p="xs">
                     <Stack gap={4} align="center">
                         <IconHourglassEmpty size={20} />
-                        <Text size="sm">Suggest Time</Text>
+                        <Text
+                            className="montserrat-med"
+                            size="xs"
+                        >
+                            SUGGEST TIME
+                        </Text>
                     </Stack>
                 </Button>
-                <Button color="blue" radius="md" h={60} w={125}>
+                <Button color="blue" radius="md" h={60} w={125} p="xs">
                     <Stack gap={4} align="center">
                         <IconInfoCircle size={20} />
-                        <Text size="sm">More Info</Text>
+                        <Text
+                            className="montserrat-med"
+                            size="xs"
+                        >
+                            MORE INFO
+                        </Text>
                     </Stack>
                 </Button>
             </Group>
