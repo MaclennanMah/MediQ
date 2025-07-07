@@ -8,6 +8,7 @@ import {
   Text,
 } from "@mantine/core";
 import { Clinic } from "@models/clinic";
+import { IconMapPin2, IconHourglassEmpty, IconInfoCircle } from "@tabler/icons-react";
 
 interface ClinicCardProps {
   clinic: Clinic;
@@ -46,7 +47,7 @@ function ClinicCard({ clinic }: ClinicCardProps) {
     clinic.distance != null ? (clinic.distance / 1000).toFixed(2) : null;
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" miw={436} withBorder>
+    <Card shadow="sm" padding="lg" radius="md" miw={450} withBorder>
       <Card.Section>
         <Group justify="flex-start" align="center" p="md">
           <Badge color="blue" variant="light">
@@ -72,15 +73,24 @@ function ClinicCard({ clinic }: ClinicCardProps) {
         </Text>
         <Text>Closing time: {clinic.closingTime}</Text>
       </Stack>
-      <Group>
-        <Button color="blue" mt="md" radius="md">
-          Directions
+      <Group justify="center" mt="md">
+        <Button color="blue"  radius="md" h={60} w={125}>
+            <Stack gap={4} align="center">
+                <IconMapPin2 size={20} />
+                <Text size="sm">Directions</Text>
+            </Stack>
         </Button>
-        <Button color="blue" mt="md" radius="md">
-          Website
+        <Button color="blue" radius="md" h={60} w={125}>
+            <Stack gap={4} align="center">
+                <IconHourglassEmpty size={20} />
+                <Text size="sm">Suggest Time</Text>
+            </Stack>
         </Button>
-        <Button color="blue" mt="md" radius="md">
-          More info
+        <Button color="blue" radius="md" h={60} w={125}>
+            <Stack gap={4} align="center">
+                <IconInfoCircle size={20} />
+                <Text size="sm">More Info</Text>
+            </Stack>
         </Button>
       </Group>
     </Card>
