@@ -1,7 +1,6 @@
 import '@mantine/core/styles.css';
 import {ColorSchemeScript, mantineHtmlProps, MantineProvider} from '@mantine/core';
 import './globals.css';
-import { Header } from '@components/ui/header';
 import Undici from "undici-types";
 import Headers = Undici.Headers;
 
@@ -22,8 +21,7 @@ export default function RootLayout({
             <ColorSchemeScript/>
         </head>
         <body>
-            <Header />
-            <MantineProvider>
+            <MantineProvider defaultColorScheme="dark">
                 {children}
             </MantineProvider>
         </body>

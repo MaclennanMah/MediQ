@@ -1,21 +1,36 @@
 /** Base clinic model shared across the app */
 export interface Clinic {
   id: string;
-  type: 'Clinic' | 'Hospital' | 'Urgent Care';
   name: string;
+
+  /** Clinic type */
+  type: 'Clinic' | 'Hospital' | 'Urgent Care';
+
+  /** Whether the clinic is open */
   isOpen: boolean;
 
-  /** distance in string form “2.5 km” (mock) or metres as number in live API */
-  distance: string | number;
+  /** Clinic closing time, e.g. “11:00 PM” or “24h” */
+  closingTime: string;
 
-  closingTime: string;          // e.g. “11:00 PM” or “24h”
-  estimatedWaitTime: string;    // e.g. “30m”, “N/A”
+  /** Estimated wait time, e.g. “30m”, “N/A” */
+  estimatedWaitTime: string;
 
-  location: { lat: number; lng: number };
+  /** Location coordinates */
+  location: {
+    lat: number;
+    lng: number;
+  };
+
+  /**
+   * Distance to user
+   * - From mock data: formatted string like "2.5 km"
+   * - From live API: numeric value in meters
+   */
+  distance: number | string;
 
   /** NEW FIELDS for feature #19 */
-  services?: string[];          // list of services
-  hours?: string;               // simple hours string (today / general)
+  services?: string[];
+  hours?: string;
   contact?: {
     phone?: string;
     email?: string;

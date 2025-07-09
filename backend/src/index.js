@@ -30,12 +30,18 @@ app.get("/health", (req, res) => {
 // Import the MongoDB connection helper and the test router
 import { connectToMongoDB } from "../database/mongodb_db/mongodb_connection.js";
 import submissionRouter from "./routes/submissions.js"
+import organizationsRouter from "./routes/organizations.js"
 
 // 4. Connect to MongoDB, then mount only the test route
 connectToMongoDB()
   .then(() => {
+    // Mount the submissions router
     console.log("✅ MongoDB connected. Now mounting /submissions.js routes....")
     app.use("/submissions", submissionRouter)
+
+    // Mount the Organizations router
+    console.log("Mounting Organizations router.....")
+    app.use("/organizations", organizationsRouter)
   })
   .catch((err) => {
     console.error("❌ Failed to connect to MongoDB:", err);
@@ -57,6 +63,16 @@ connectToMySQL()
     console.error('❌ MySQL connection failed, skipping /mysql_test_route:');
   });
 
+
+//Catch malformed JSON bodies
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    return res
+      .status(400)
+      .json({ error: "Invalid JSON payload. Please check your request body." });
+  }
+  next(err);
+});
 
 // 6. Start listening
 const PORT = process.env.PORT || 4000;
