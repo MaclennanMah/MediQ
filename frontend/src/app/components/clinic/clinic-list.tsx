@@ -27,9 +27,8 @@ export default function ClinicList() {
 
   return (
     <>
-      <Stack h="90vh" maw={400}>
+      <Stack h="90vh" maw={450} mx="auto">
         <Input
-          mr="sm"
           placeholder="Enter address to find nearest location"
           rightSectionPointerEvents="all"
           rightSection={
@@ -38,7 +37,7 @@ export default function ClinicList() {
             </ActionIcon>
           }
         ></Input>
-        <Group justify="space-between" align="center" mr="sm">
+        <Group justify="space-between" align="center">
           <Popover
             width={300}
             trapFocus
@@ -66,7 +65,7 @@ export default function ClinicList() {
 
         {loading ? (
           <ScrollArea>
-            <Stack mr="sm">
+            <Stack>
               {/* Display 3 skeleton cards while loading */}
               {Array(3)
                 .fill(0)
@@ -79,7 +78,7 @@ export default function ClinicList() {
           <Text>{error}</Text>
         ) : (
           <ScrollArea>
-            <Stack mr="sm">
+            <Stack>
               {filteredClinics.length > 0 ? (
                 filteredClinics.map((clinic) => (
                   <ClinicCard key={clinic.id} clinic={clinic} />

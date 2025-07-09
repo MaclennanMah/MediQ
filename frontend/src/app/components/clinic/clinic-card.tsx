@@ -1,90 +1,139 @@
 import {
-  Badge,
-  Button,
-  Card,
-  Group,
-  Skeleton,
-  Stack,
-  Text,
+    Badge,
+    Button,
+    Card,
+    Group,
+    Skeleton,
+    Stack,
+    Text,
 } from "@mantine/core";
 import { Clinic } from "@models/clinic";
+import { IconMapPin2, IconHourglassEmpty, IconInfoCircle, IconClockHour2, IconUserPin } from "@tabler/icons-react";
 
 interface ClinicCardProps {
-  clinic: Clinic;
+    clinic: Clinic;
 }
 
 export function ClinicCardSkeleton() {
-  return (
-    <Card shadow="sm" padding="lg" radius="md" miw={400} withBorder>
-      <Card.Section>
-        <Group justify="flex-start" align="center" p="md">
-          <Skeleton height={20} width={62} radius="sm" />
-          <Skeleton height={20} width={62} radius="sm" />
-        </Group>
-      </Card.Section>
+    return (
+        <Card shadow="sm" padding="lg" radius="md" miw={436} withBorder>
+            <Card.Section>
+                <Group justify="flex-start" align="center" p="md">
+                    <Skeleton height={20} width={62} radius="sm" />
+                    <Skeleton height={20} width={62} radius="sm" />
+                </Group>
+            </Card.Section>
 
-      <Group justify="space-between" mb="xs">
-        <Skeleton height={25} width={150} radius="sm" />
-        <Skeleton height={20} width={42} radius="sm" />
-      </Group>
-      <Stack gap="0">
-        <Skeleton height={24} width="70%" radius="sm" />
-        <Skeleton height={24} width="60%" radius="sm" />
-      </Stack>
-      <Group>
-        <Skeleton height={36} width={100} mt="md" radius="md" />
-        <Skeleton height={36} width={100} mt="md" radius="md" />
-        <Skeleton height={36} width={100} mt="md" radius="md" />
-      </Group>
-    </Card>
-  );
+            <Group justify="space-between" mb="xs">
+                <Skeleton height={25} width={150} radius="sm" />
+                <Skeleton height={20} width={42} radius="sm" />
+            </Group>
+            <Stack gap="0">
+                <Skeleton height={24} width="70%" radius="sm" />
+                <Skeleton height={24} width="60%" radius="sm" />
+            </Stack>
+            <Group>
+                <Skeleton height={36} width={100} mt="md" radius="md" />
+                <Skeleton height={36} width={100} mt="md" radius="md" />
+                <Skeleton height={36} width={100} mt="md" radius="md" />
+            </Group>
+        </Card>
+    );
 }
 
 // Kilometers function
 function ClinicCard({ clinic }: ClinicCardProps) {
-  const distanceKm =
-    clinic.distance != null ? (clinic.distance / 1000).toFixed(2) : null;
+    const distanceKm =
+        clinic.distance != null ? (clinic.distance / 1000).toFixed(2) : null;
 
-  return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Card.Section>
-        <Group justify="flex-start" align="center" p="md">
-          <Badge color="blue" variant="light">
-            <Text size="xs" c="dimmed">
-              {clinic.type}
-            </Text>
-          </Badge>
-          <Badge color={clinic.isOpen ? "green" : "red"} variant="light">
-            <Text size="xs" c="dimmed">
-              {clinic.isOpen ? "OPEN" : "CLOSED"}
-            </Text>
-          </Badge>
-        </Group>
-      </Card.Section>
+    return (
+        <Card shadow="sm" padding="lg" radius="md" miw={450} withBorder>
+            {/*Labels*/}
+            <Card.Section>
+                <Group justify="flex-start" align="center" p="md">
+                    <Badge color="blue" variant="light">
+                        <Text size="xs" c="dimmed">
+                            {clinic.type}
+                        </Text>
+                    </Badge>
+                    <Badge color={clinic.isOpen ? "green" : "red"} variant="light">
+                        <Text size="xs" c="dimmed">
+                            {clinic.isOpen ? "OPEN" : "CLOSED"}
+                        </Text>
+                    </Badge>
+                </Group>
+            </Card.Section>
 
-      <Group justify="space-between" mb="xs">
-        <Text fw={500}>{clinic.name}</Text>
-        <Badge color="pink">{clinic.estimatedWaitTime}</Badge>
-      </Group>
-      <Stack gap="0">
-        <Text>
-          {distanceKm ? `Distance: ${distanceKm} km away` : "Distance: unknown"}
-        </Text>
-        <Text>Closing time: {clinic.closingTime}</Text>
-      </Stack>
-      <Group>
-        <Button color="blue" mt="md" radius="md">
-          Directions
-        </Button>
-        <Button color="blue" mt="md" radius="md">
-          Website
-        </Button>
-        <Button color="blue" mt="md" radius="md">
-          More info
-        </Button>
-      </Group>
-    </Card>
-  );
+            {/*Clinic Name and Estimated Wait Time*/}
+            <Group justify="space-between" mb="xs">
+                <Text
+                    className="montserrat-bold"
+                    fz="lg"
+                    style={{flex:1, midWidth:0}}
+                    lineClamp={2}
+                >
+                    {clinic.name}
+                </Text>
+                <Badge
+                    color="pink"
+                    style={{ flexShrink: 0, alignSelf: "center" }}
+                >
+                    {clinic.estimatedWaitTime}
+                </Badge>
+            </Group>
+
+            {/*Distance and Closing Time Groups*/}
+            <Stack gap={2}>
+                <Group gap="xs">
+                    <IconUserPin size={16} />
+                    <Text size ="sm">
+                        {distanceKm ? `${distanceKm} km away from you` : "Distance: unknown"}
+                    </Text>
+                </Group>
+                <Group gap="xs">
+                    <IconClockHour2 size={16} />
+                    <Text size ="sm"> Closes at {clinic.closingTime}</Text>
+                </Group>
+            </Stack>
+
+            {/*Buttons*/}
+            <Group justify="center" mt="md">
+                <Button color="blue"  radius="md" h={60} w={125} p="xs">
+                    <Stack gap={4} align="center">
+                        <IconMapPin2 size={20} />
+                        <Text
+                            className="montserrat-med"
+                            size="xs"
+                        >
+                            DIRECTIONS
+                        </Text>
+                    </Stack>
+                </Button>
+                <Button color="blue" radius="md" h={60} w={125} p="xs">
+                    <Stack gap={4} align="center">
+                        <IconHourglassEmpty size={20} />
+                        <Text
+                            className="montserrat-med"
+                            size="xs"
+                        >
+                            SUGGEST TIME
+                        </Text>
+                    </Stack>
+                </Button>
+                <Button color="blue" radius="md" h={60} w={125} p="xs">
+                    <Stack gap={4} align="center">
+                        <IconInfoCircle size={20} />
+                        <Text
+                            className="montserrat-med"
+                            size="xs"
+                        >
+                            MORE INFO
+                        </Text>
+                    </Stack>
+                </Button>
+            </Group>
+        </Card>
+    );
 }
 
 export default ClinicCard;
