@@ -26,70 +26,65 @@ export default function ClinicList() {
       : clinics.filter((clinic) => clinic.type === selectedType);
 
   return (
-    <>
-      <Stack h="90vh" maw={450} mx="auto">
-        <Input
-          placeholder="Enter address to find nearest location"
-          rightSectionPointerEvents="all"
-          rightSection={
-            <ActionIcon variant="transparent" size="lg">
-              {<SearchIcon />}
-            </ActionIcon>
-          }
-        ></Input>
-        <Group justify="space-between" align="center">
-          <Popover
-            width={300}
-            trapFocus
-            position="bottom"
-            withArrow
-            shadow="md"
-          >
-            <Popover.Target>
-              <ActionIcon variant="transparent">
-                <FilterIcon />
-              </ActionIcon>
-            </Popover.Target>
-            <Popover.Dropdown>
-              {/*TODO: add filter options here*/}
-              <Text>test filter options</Text>
-            </Popover.Dropdown>
-          </Popover>
-          <NativeSelect
-            rightSection={<ChevronDownIcon size={16} />}
-            data={["All", "Clinic", "Hospital", "Urgent Care"]}
-            value={selectedType}
-            onChange={(event) => setSelectedType(event.currentTarget.value)}
-          />
-        </Group>
+    <Stack h="90vh" maw={450} mx="auto">
+      {/* Search Input */}
+      <Input
+        placeholder="Enter address to find nearest location"
+        rightSectionPointerEvents="all"
+        rightSection={
+          <ActionIcon variant="transparent" size="lg">
+            <SearchIcon />
+          </ActionIcon>
+        }
+      />
 
-        {loading ? (
-          <ScrollArea>
-            <Stack>
-              {/* Display 3 skeleton cards while loading */}
-              {Array(3)
-                .fill(0)
-                .map((_, index) => (
-                  <ClinicCardSkeleton key={index} />
-                ))}
-            </Stack>
-          </ScrollArea>
-        ) : error ? (
-          <Text>{error}</Text>
-        ) : (
-          <ScrollArea>
-            <Stack>
-              {filteredClinics.length > 0 ? (
-                filteredClinics.map((clinic) => (
-                  <ClinicCard key={clinic.id} clinic={clinic} />
-                ))
-              ) : (
-                <Text>No medical facilities found in this area.</Text>
-              )}
-            </Stack>
-          </ScrollArea>
-        )}
-      </Stack>
-    </>
+      {/* Filter and Type Select */}
+      <Group justify="space-between" align="center">
+        <Popover width={300} trapFocus position="bottom" withArrow shadow="md">
+          <Popover.Target>
+            <ActionIcon variant="transparent">
+              <FilterIcon />
+            </ActionIcon>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Text>test filter options</Text>
+          </Popover.Dropdown>
+        </Popover>
+
+        <NativeSelect
+          rightSection={<ChevronDownIcon size={16} />}
+          data={["All", "Clinic", "Hospital", "Urgent Care"]}
+          value={selectedType}
+          onChange={(event) => setSelectedType(event.currentTarget.value)}
+        />
+      </Group>
+
+      {/* Clinics List */}
+      {loading ? (
+        <ScrollArea>
+          <Stack>
+            {Array(3)
+              .fill(0)
+              .map((_, index) => (
+                <ClinicCardSkeleton key={index} />
+              ))}
+          </Stack>
+        </ScrollArea>
+      ) : error ? (
+        <Text>{error}</Text>
+      ) : (
+        <ScrollArea>
+          <Stack>
+            {filteredClinics.length > 0 ? (
+              filteredClinics.map((clinic) => (
+                <ClinicCard key={clinic.id} clinic={clinic} />
+              ))
+            ) : (
+              <Text>No medical facilities found in this area.</Text>
+            )}
+          </Stack>
+        </ScrollArea>
+      )}
+    </Stack>
   );
 }
