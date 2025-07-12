@@ -1,3 +1,6 @@
+"use client";
+
+import React from "react";
 import {
   Badge,
   Button,
@@ -7,15 +10,19 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { Clinic } from "@models/clinic";
+import {
+  IconMapPin2,
+  IconHourglassEmpty,
+  IconInfoCircle,
+  IconClockHour2,
+  IconUserPin,
+} from "@tabler/icons-react";
+import { Clinic } from "@/models/clinic";
 
-interface ClinicCardProps {
-  clinic: Clinic;
-}
-
+/* ─────────────────────────── Skeleton ─────────────────────────── */
 export function ClinicCardSkeleton() {
   return (
-    <Card shadow="sm" padding="lg" radius="md" miw={400} withBorder>
+    <Card shadow="sm" p="lg" radius="md" miw={436} withBorder>
       <Card.Section>
         <Group justify="flex-start" align="center" p="md">
           <Skeleton height={20} width={62} radius="sm" />
@@ -40,13 +47,28 @@ export function ClinicCardSkeleton() {
   );
 }
 
-// Kilometers function
-function ClinicCard({ clinic }: ClinicCardProps) {
+/* ─────────────────────────── Helpers ─────────────────────────── */
+function waitTimeColour(wt: string) {
+  const n = parseInt(wt); // crude “30m” → 30
+  if (isNaN(n)) return "gray";
+  if (n < 15) return "green";
+  if (n < 30) return "yellow";
+  return "red";
+}
+
+/* ─────────────────────────── Card ─────────────────────────── */
+export default function ClinicCard({ clinic }: { clinic: Clinic }) {
   const distanceKm =
-    clinic.distance != null ? (clinic.distance / 1000).toFixed(2) : null;
+    clinic.distance != null && typeof clinic.distance === "number"
+      ? (clinic.distance / 1000).toFixed(2)
+      : clinic.distance; // fallback to string
+
+  const colour = waitTimeColour(clinic.estimatedWaitTime);
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinic.location.lat},${clinic.location.lng}`;
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder>
+    <Card shadow="sm" p="lg" radius="md" miw={450} withBorder>
+      {/* ── Labels ─────────────────────────────────────────────── */}
       <Card.Section>
         <Group justify="flex-start" align="center" p="md">
           <Badge color="blue" variant="light">
@@ -62,29 +84,104 @@ function ClinicCard({ clinic }: ClinicCardProps) {
         </Group>
       </Card.Section>
 
+      {/* ── Name + Wait-time badge ─────────────────────────────── */}
       <Group justify="space-between" mb="xs">
-        <Text fw={500}>{clinic.name}</Text>
-        <Badge color="pink">{clinic.estimatedWaitTime}</Badge>
-      </Group>
-      <Stack gap="0">
-        <Text>
-          {distanceKm ? `Distance: ${distanceKm} km away` : "Distance: unknown"}
+        <Text
+          className="montserrat-bold"
+          fz="lg"
+          style={{ flex: 1, minWidth: 0 }}
+          lineClamp={2}
+        >
+          {clinic.name}
         </Text>
-        <Text>Closing time: {clinic.closingTime}</Text>
+
+        <Badge color={colour} style={{ flexShrink: 0, alignSelf: "center" }}>
+          {clinic.estimatedWaitTime}
+        </Badge>
+      </Group>
+
+      {/* ── Distance & Closing Time ────────────────────────────── */}
+      <Stack gap={2}>
+        <Group gap="xs">
+          <IconUserPin size={16} />
+          <Text size="sm">
+            {distanceKm ? `${distanceKm} km away from you` : "Distance unknown"}
+          </Text>
+        </Group>
+        <Group gap="xs">
+          <IconClockHour2 size={16} />
+          <Text size="sm">Closes at {clinic.closingTime}</Text>
+        </Group>
       </Stack>
-      <Group>
-        <Button color="blue" mt="md" radius="md">
-          Directions
+
+      {/* ── NEW: Services / Hours / Contact ────────────────────── */}
+      {clinic.services && clinic.services.length > 0 && (
+        <Text size="sm" mt="sm">
+          <b>Services:</b> {clinic.services.join(", ")}
+        </Text>
+      )}
+
+      {clinic.hours && (
+        <Text size="sm">
+          <b>Hours:</b> {clinic.hours}
+        </Text>
+      )}
+
+      {clinic.contact && (clinic.contact.phone || clinic.contact.email) && (
+        <Text size="sm">
+          {clinic.contact.phone && (
+            <>
+              📞 {clinic.contact.phone}
+              <br />
+            </>
+          )}
+          {clinic.contact.email && (
+            <>
+              ✉️ {clinic.contact.email}
+              <br />
+            </>
+          )}
+        </Text>
+      )}
+
+      {/* ── Buttons ────────────────────────────────────────────── */}
+      <Group justify="center" mt="md">
+        <Button
+          color="blue"
+          radius="md"
+          h={60}
+          w={125}
+          p="xs"
+          component="a"
+          href={mapsUrl}
+          target="_blank"
+        >
+          <Stack gap={4} align="center">
+            <IconMapPin2 size={20} />
+            <Text className="montserrat-med" size="xs">
+              DIRECTIONS
+            </Text>
+          </Stack>
         </Button>
-        <Button color="blue" mt="md" radius="md">
-          Website
+
+        <Button color="blue" radius="md" h={60} w={125} p="xs">
+          <Stack gap={4} align="center">
+            <IconHourglassEmpty size={20} />
+            <Text className="montserrat-med" size="xs">
+              SUGGEST&nbsp;TIME
+            </Text>
+          </Stack>
         </Button>
-        <Button color="blue" mt="md" radius="md">
-          More info
+
+        <Button color="blue" radius="md" h={60} w={125} p="xs">
+          <Stack gap={4} align="center">
+            <IconInfoCircle size={20} />
+            <Text className="montserrat-med" size="xs">
+              MORE&nbsp;INFO
+            </Text>
+          </Stack>
         </Button>
       </Group>
     </Card>
   );
 }
-
-export default ClinicCard;
