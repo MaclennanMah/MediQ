@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import HealthcareOrganization from '../../database/mongodb_db/models/HealthCareOrganization.js';
+import geo from '../../services/geocoder.js';
 
 // Set router
 const router = express.Router();
@@ -25,6 +26,40 @@ router.get('/', async (req, res) => {
         res.status(500).json({error: 'Could not fetch healthcare organizational data'})
     }
 })
+
+/**
+ * GET /organizations/search/near?lat=XXX&lng=ZZZ
+ * --> Finds the organizations nearby based on latitude and longitude. If the 'max' key is not
+ *     inputted, it automatically is set to 10000 (which means 10 km). 
+ */
+router.get('/search/near', async (req, res) => {
+  const { lat, lng, max = 10000 } = req.query;
+  const latitude  = parseFloat(lat);
+  const longitude = parseFloat(lng);
+  if (isNaN(latitude) || isNaN(longitude)) {
+    return res.status(400).json({ error: 'Invalid lat or lng' });
+  }
+
+  // parse and validate maxDistance
+  const maxDistanceMeters = parseInt(max, 10) || 10000;
+  if (isNaN(maxDistanceMeters) || maxDistanceMeters <= 0) {
+    return res.status(400).json({ error: 'maxDistance must be a positive integer (in meters)' });
+  }
+
+  const nearby = await HealthcareOrganization.find({
+    location: {
+      $near: {
+        $geometry: {
+          type: 'Point',
+          coordinates: [longitude, latitude]
+        },
+        $maxDistance: maxDistanceMeters  // in meters
+      }
+    }
+  }).lean();
+
+  res.json(nearby);
+});
 
 /**
  * GET /organizations/orgID
@@ -57,11 +92,13 @@ router.get('/:orgID', async (req, res) => {
     }
 })
 
+
 /**
  * POST /organizations/
  * --> This route adds a single organization to the database
  */
-router.post('/', async (req, res) => {
+router.post('/', async (req, res) => { 
+
     // First get the authorization header
     const authorization = req.headers.authorization
     
@@ -78,16 +115,41 @@ router.post('/', async (req, res) => {
         return res.status(401).json({message: 'Invalid Authorization token'})
     }
     
+    const { organizationName, address, phoneNumber, organizationType } = req.body || {};
+    if (!organizationName?.trim() || !address?.trim() || !organizationType) {
+        return res
+        .status(400)
+        .json({ message: 'organizationName, address and organizationType are required' });
+    }
+    console.log('Now moving onto geo coder')
     try {
-         // Get the data from the req.json
-        const newOrganization = await HealthcareOrganization.create(req.body)
-        return res.status(201).json({message: 'Successfully created new organization'})
+        // Here we geo code
+        const [geoRes] = await geo.geocode(address)
+        console.log(geoRes)
+
+        if (!geoRes || typeof geoRes.latitude !== 'number') {
+            return res.status(400).json({message: 'Unable to geocode address. Invalid address.'})
+        }
+
+        // Create new organization
+        const newOrganization = await HealthcareOrganization.create({
+            organizationName: organizationName.trim(),
+            address: address.trim(),
+            phoneNumber: phoneNumber || null,
+            organizationType,
+            location: {
+                type: 'Point',
+                coordinates: [geoRes.latitude, geoRes.longitude]
+            }
+        })
+
+        return res.status(201).json({message: `Successfully created new organization. ${newOrganization}`})
     }
     catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ error: error.message });
         }
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' + error});
     }   
 })
 
