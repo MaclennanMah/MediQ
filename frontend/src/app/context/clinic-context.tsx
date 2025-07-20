@@ -26,6 +26,7 @@ export interface EnrichedClinic extends Clinic {
   services?: string[];
   hours?: string;
   contact?: { phone?: string; email?: string };
+  distance?: number;
 }
 
 interface ClinicContextType {
@@ -35,6 +36,8 @@ interface ClinicContextType {
   updateMapBounds: (b: [number, number, number, number]) => void;
   currentBounds: [number, number, number, number] | null;
   userLocation: UserLocation | null;
+  searchTerm: string;
+  updateSearchTerm: (term: string) => void;
 }
 
 /* ─────────────────────── Context Setup ───────────────────── */
@@ -45,6 +48,8 @@ const ClinicContext = createContext<ClinicContextType>({
   updateMapBounds: () => {},
   currentBounds: null,
   userLocation: null,
+  searchTerm: "",
+  updateSearchTerm: () => {},
 });
 
 export const useClinicContext = () => useContext(ClinicContext);
@@ -56,12 +61,15 @@ export const ClinicProvider = ({ children }: { children: ReactNode }) => {
   /* clinics → what components consume (includes distance) */
   const [clinics, setClinics] = useState<EnrichedClinic[]>(mockClinics);
 
-  const [currentBounds, setCurrentBounds] =
-    useState<[number, number, number, number] | null>(null);
+  const [currentBounds, setCurrentBounds] = useState<
+    [number, number, number, number] | null
+  >(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   /* ── 1. Geolocation watcher ─────────────────────────────── */
   useEffect(() => {
@@ -99,7 +107,10 @@ export const ClinicProvider = ({ children }: { children: ReactNode }) => {
           ...c,
           services: c.services ?? ["General Service"],
           hours: c.hours ?? "N/A",
-          contact: c.contact ?? { phone: "Not available", email: "Not available" },
+          contact: c.contact ?? {
+            phone: "Not available",
+            email: "Not available",
+          },
         }));
 
         setRawClinics(enriched);
@@ -116,27 +127,33 @@ export const ClinicProvider = ({ children }: { children: ReactNode }) => {
 
   /* ── 3. Re-compute distance & sort when rawClinics/userLocation change ── */
   useEffect(() => {
-    if (!userLocation) {
-      setClinics(rawClinics);
-      return;
+    let arr = rawClinics.map((c) => ({
+      ...c,
+      distance: userLocation
+        ? haversineDistance(
+            userLocation.lat,
+            userLocation.lng,
+            c.location.lat,
+            c.location.lng
+          )
+        : undefined,
+    }));
+
+    if (userLocation) {
+      arr.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
     }
 
-    const withDistance = rawClinics
-      .map((c) => ({
-        ...c,
-        distance: haversineDistance(
-          userLocation.lat,
-          userLocation.lng,
-          c.location.lat,
-          c.location.lng
-        ),
-      }))
-      .sort(
-        (a, b) => (a.distance ?? Number.POSITIVE_INFINITY) - (b.distance ?? Number.POSITIVE_INFINITY)
-      );
+    const term = searchTerm.trim().toLowerCase();
+    if (term) {
+      arr = arr.filter((c) => c.name.toLowerCase().includes(term));
+    }
 
-    setClinics(withDistance);
-  }, [rawClinics, userLocation]);
+    setClinics(arr);
+  }, [rawClinics, userLocation, searchTerm]);
+
+  const updateSearchTerm = useCallback((term: string) => {
+    setSearchTerm(term);
+  }, []);
 
   /* ── Provide context ─────────────────────────────────────── */
   return (
@@ -148,6 +165,8 @@ export const ClinicProvider = ({ children }: { children: ReactNode }) => {
         updateMapBounds,
         currentBounds,
         userLocation,
+        searchTerm,
+        updateSearchTerm,
       }}
     >
       {children}
