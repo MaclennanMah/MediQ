@@ -4,7 +4,7 @@ export interface Clinic {
   name: string;
 
   /** Clinic type */
-  type: 'Clinic' | 'Hospital' | 'Urgent Care';
+  type: "Clinic" | "Hospital" | "Urgent Care";
 
   /** Whether the clinic is open */
   isOpen: boolean;
@@ -26,7 +26,7 @@ export interface Clinic {
    * - From mock data: formatted string like "2.5 km"
    * - From live API: numeric value in meters
    */
-  distance: number | string;
+  distance?: number;
 
   /** NEW FIELDS for feature #19 */
   services?: string[];

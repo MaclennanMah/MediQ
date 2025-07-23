@@ -18,7 +18,8 @@ import { useClinicContext } from "@/context/clinic-context";
 
 export default function ClinicList() {
   const [selectedType, setSelectedType] = useState<string>("All");
-  const { clinics, loading, error } = useClinicContext();
+  const { clinics, loading, error, searchTerm, updateSearchTerm } =
+    useClinicContext();
 
   const filteredClinics =
     selectedType === "All"
@@ -27,9 +28,10 @@ export default function ClinicList() {
 
   return (
     <Stack h="90vh" maw={450} mx="auto">
-      {/* Search Input */}
       <Input
-        placeholder="Enter address to find nearest location"
+        placeholder="Search clinics by name"
+        value={searchTerm}
+        onChange={(e) => updateSearchTerm(e.currentTarget.value)}
         rightSectionPointerEvents="all"
         rightSection={
           <ActionIcon variant="transparent" size="lg">
