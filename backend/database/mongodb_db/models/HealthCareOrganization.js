@@ -3,6 +3,11 @@ import mongoose from 'mongoose';
 
 const healthcareOrganizationSchema = new mongoose.Schema(
   {
+    externalId: {
+    type: String,
+    unique: true,
+    required: true   // e.g. "node/12345" or "way/67890"
+    },
     organizationName: { type: String, required: true, trim: true },
     address:           { type: String, required: true, trim: true },
     phoneNumber:       { type: String, default: null },
