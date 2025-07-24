@@ -12,6 +12,7 @@ export async function fetchFromOverpass([south, west, north, east]) {
     >;
     out skel qt;
   `;
+  
   const url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
   const res = await fetch(url);
   if (!res.ok) throw new Error('Overpass failed: ' + await res.text());
