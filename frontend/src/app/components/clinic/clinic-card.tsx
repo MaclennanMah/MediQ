@@ -119,36 +119,6 @@ export default function ClinicCard({ clinic }: { clinic: Clinic }) {
         </Group>
       </Stack>
 
-      {/* ── NEW: Services / Hours / Contact ────────────────────── */}
-      {clinic.services && clinic.services.length > 0 && (
-        <Text size="sm" mt="sm">
-          <b>Services:</b> {clinic.services.join(", ")}
-        </Text>
-      )}
-
-      {clinic.hours && (
-        <Text size="sm">
-          <b>Hours:</b> {clinic.hours}
-        </Text>
-      )}
-
-      {clinic.contact && (clinic.contact.phone || clinic.contact.email) && (
-        <Text size="sm">
-          {clinic.contact.phone && (
-            <>
-              📞 {clinic.contact.phone}
-              <br />
-            </>
-          )}
-          {clinic.contact.email && (
-            <>
-              ✉️ {clinic.contact.email}
-              <br />
-            </>
-          )}
-        </Text>
-      )}
-
       {/* ── Buttons ────────────────────────────────────────────── */}
       <Group justify="center" mt="md">
         <Button
