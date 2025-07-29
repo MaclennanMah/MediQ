@@ -57,6 +57,11 @@ function waitTimeColour(wt: string) {
 }
 
 /* ─────────────────────────── Card ─────────────────────────── */
+interface ClinicCardProps {
+  clinic: Clinic;
+  onMoreInfoClick: (clinic: Clinic) => void;
+}
+
 export default function ClinicCard({ clinic }: { clinic: Clinic }) {
   const distanceKm =
     clinic.distance != null && typeof clinic.distance === "number"
