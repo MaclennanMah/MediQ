@@ -34,5 +34,6 @@ export interface Clinic {
   contact?: {
     phone?: string;
     email?: string;
+    website?: string;
   };
 }
