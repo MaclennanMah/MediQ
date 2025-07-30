@@ -229,7 +229,7 @@ export default function ClinicInfoPanel({
                             </Text>
                             <Stack gap={2}>
                                 <Text size="sm" c="orange" fw={500} mb={4}>
-                                    Coming Soon! Hours data not available from OpenStreetMap
+                                    Coming Soon! Hours data not available from OpenStreetMap.
                                 </Text>
                                 <Group justify="space-between">
                                     <Text size="sm">For current hours:</Text>
@@ -259,6 +259,45 @@ export default function ClinicInfoPanel({
                         </Box>
                     </Group>
 
+                    {/* Website */}
+                    <Group gap="sm" align="flex-start">
+                        <IconWorld size={20} style={{marginTop: 2, flexShrink: 0}}/>
+                        <Box flex={1}>
+                            <Text size="sm" fw={600} mb={2}>
+                                Website
+                            </Text>
+                            {clinic.contact?.website ||
+                            (clinic as any).website ||
+                            (clinic as any).tags?.website ||
+                            (clinic as any).tags?.["contact:website"] ? (
+                                <Text
+                                    size="sm"
+                                    c="blue"
+                                    component="a"
+                                    href={
+                                        clinic.contact?.website ||
+                                        (clinic as any).website ||
+                                        (clinic as any).tags?.website ||
+                                        (clinic as any).tags?.["contact:website"]
+                                    }
+                                    target="_blank"
+                                    style={{textDecoration: "underline"}}
+                                >
+                                    {(
+                                        clinic.contact?.website ||
+                                        (clinic as any).website ||
+                                        (clinic as any).tags?.website ||
+                                        (clinic as any).tags?.["contact:website"]
+                                    )?.replace(/^https?:\/\//, '')}
+                                </Text>
+                            ) : (
+                                <Text size="sm" c="dimmed">
+                                    Website is currently not available at this time.
+                                </Text>
+                            )}
+                        </Box>
+                    </Group>
+
                     {/* Phone Number */}
                     <Group gap="sm" align="flex-start">
                         <IconPhone size={20} style={{marginTop: 2, flexShrink: 0}}/>
@@ -278,7 +317,7 @@ export default function ClinicInfoPanel({
                                 </Text>
                             ) : (
                                 <Text size="sm" c="dimmed">
-                                    Phone currently not available.
+                                    Phone number is currently not available at this time.
                                 </Text>
                             )}
                         </Box>
