@@ -11,6 +11,7 @@ import {
     Box,
     ScrollArea,
     ActionIcon,
+    Skeleton,
 } from "@mantine/core";
 import {
     IconMapPin,
@@ -22,6 +23,7 @@ import {
     IconMapPin2,
 } from "@tabler/icons-react";
 import { Clinic } from "@/models/clinic";
+import { useClinicAddress } from "@/utils/address";
 
 interface ClinicInfoPanelProps {
     clinic: Clinic;
@@ -61,21 +63,16 @@ function formatOperatingHours(hours?: string) {
     ];
 }
 
-function formatAddress(clinic: Clinic): string {
-    if (clinic.location?.lat && clinic.location?.lng) {
-        return `Coordinates: ${clinic.location.lat.toFixed(4)}, ${clinic.location.lng.toFixed(4)}`;
-    }
-    return "Address not available";
-}
-
 export default function ClinicInfoPanel({
     clinic,
     onBack,
 }: ClinicInfoPanelProps) {
     const colour = waitTimeColour(clinic.estimatedWaitTime);
     const operatingHours = formatOperatingHours(clinic.hours);
-    const address = formatAddress(clinic);
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinic.location.lat},${clinic.location.lng}`;
+
+    // use hook to get address
+    const { address, loading: addressLoading} = useClinicAddress(clinic);
 
     // calc distance display
     const distanceKm =
@@ -135,8 +132,8 @@ export default function ClinicInfoPanel({
                             </Text>
                         </Group>
                     )}
-                    <Stack gap="md">
 
+                    <Stack gap="md">
                     {/* Address */}
                     <Group gap="sm" align="flex-start">
                         <IconMapPin size={20} style={{marginTop: 2, flexShrink: 0}}/>
@@ -144,9 +141,13 @@ export default function ClinicInfoPanel({
                             <Text size="sm" fw={600} mb={2}>
                                 Address
                             </Text>
-                            <Text size="sm" c="dimmed">
-                                {address}
-                            </Text>
+                            {addressLoading ? (
+                                <Skeleton height={40} radius={"sm"} />
+                            ) : (
+                                <Text size="sm" c="dimmed">
+                                    {address|| "Address not available"}
+                                </Text>
+                            )}
                         </Box>
                     </Group>
 
