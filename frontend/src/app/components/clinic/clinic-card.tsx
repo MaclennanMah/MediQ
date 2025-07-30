@@ -113,10 +113,11 @@ export default function ClinicCard({ clinic, onMoreInfoClick }: ClinicCardProps)
             {distanceKm ? `${distanceKm} km away from you` : "Distance unknown"}
           </Text>
         </Group>
-        <Group gap="xs">
-          <IconClockHour2 size={16} />
-          <Text size="sm">Closes at {clinic.closingTime}</Text>
-        </Group>
+        {/*Commenting out for the time being. Unable to add operating hours at this time. */}
+        {/*<Group gap="xs">*/}
+        {/*  <IconClockHour2 size={16} />*/}
+        {/*  <Text size="sm">Closes at {clinic.closingTime}</Text>*/}
+        {/*</Group>*/}
       </Stack>
 
       {/* ── Buttons ────────────────────────────────────────────── */}
