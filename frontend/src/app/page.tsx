@@ -7,6 +7,8 @@ import {ClinicProvider} from "@/context/clinic-context";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import {ThemeLogo} from "@/components/ui/ThemeLogo";
+import { Clinic } from "@/models/clinic";
+import {useState} from "react";
 
 const ClinicMap = dynamic(() => import("@/components/clinic/clinic-map"), {
     ssr: false,
@@ -15,6 +17,11 @@ const ClinicMap = dynamic(() => import("@/components/clinic/clinic-map"), {
 
 function App() {
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+    const [selectedClinic, setSelectedClinic] = useState<Clinic | null>(null);
+
+    const handleClinicSelect = (clinic: Clinic | null) => {
+        setSelectedClinic(clinic);
+    };
 
     return (
         <ClinicProvider>
@@ -42,10 +49,15 @@ function App() {
 
                 <AppShell.Main className="main-container">
                     <div className="sidebar">
-                        <ClinicList />
+                        <ClinicList
+                            selectedClinic ={selectedClinic}
+                            onClinicSelect ={handleClinicSelect}
+                        />
                     </div>
                     <div className="map-container">
-                        <ClinicMap />
+                        <ClinicMap
+                            onClinicSelect ={handleClinicSelect}
+                        />
                     </div>
                 </AppShell.Main>
 
