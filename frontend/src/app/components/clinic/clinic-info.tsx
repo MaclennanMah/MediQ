@@ -38,28 +38,97 @@ function waitTimeColour(wt: string) {
     return "red";
 }
 
-function formatOperatingHours(hours?: string) {
-    if (!hours || hours === "N/A" || hours === "Unknown") {
-        return [
-            { day: "Monday", hours: "Hours not available" },
-            { day: "Tuesday", hours: "Hours not available" },
-            { day: "Wednesday", hours: "Hours not available" },
-            { day: "Thursday", hours: "Hours not available" },
-            { day: "Friday", hours: "Hours not available" },
-            { day: "Saturday", hours: "Hours not available" },
-            { day: "Sunday", hours: "Hours not available" },
-        ];
+function parseOpeningHours(hours?: string) {
+    if (!hours || hours === "N/A" || hours === "Unknown" || hours.trim() === "") {
+        return null;
     }
 
-    const defaultHours = "Check with facility";
+    try {
+        const daysMap: { [key: string]: string } = {
+            'Mo': 'Monday',
+            'Tu': 'Tuesday',
+            'We': 'Wednesday',
+            'Th': 'Thursday',
+            'Fr': 'Friday',
+            'Sa': 'Saturday',
+            'Su': 'Sunday'
+        };
+
+        // handle simple formats like "Mo-Fr 09:00-17:00" or "24/7"
+        if (hours === "24/7") {
+            const daySchedule = { day: "Every day", hours: "24 hours" };
+            return Array(7).fill(0).map((_, i) => ({
+                day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][i],
+                hours: "24 hours"
+            }));
+        }
+
+        // handle "Mo-Fr HH:MM-HH:MM" format
+        const weekdayPattern = /^Mo-Fr\s+(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/;
+        const weekdayMatch = hours.match(weekdayPattern);
+        if (weekdayMatch) {
+            const [, startHour, startMin, endHour, endMin] = weekdayMatch;
+            const timeStr = `${startHour}:${startMin} - ${endHour}:${endMin}`;
+            return [
+                { day: "Monday", hours: timeStr },
+                { day: "Tuesday", hours: timeStr },
+                { day: "Wednesday", hours: timeStr },
+                { day: "Thursday", hours: timeStr },
+                { day: "Friday", hours: timeStr },
+                { day: "Saturday", hours: "Closed" },
+                { day: "Sunday", hours: "Closed" },
+            ];
+        }
+
+        // handle "Mo-Su HH:MM-HH:MM" format
+        const allDaysPattern = /^Mo-Su\s+(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/;
+        const allDaysMatch = hours.match(allDaysPattern);
+        if (allDaysMatch) {
+            const [, startHour, startMin, endHour, endMin] = allDaysMatch;
+            const timeStr = `${startHour}:${startMin} - ${endHour}:${endMin}`;
+            return Array(7).fill(0).map((_, i) => ({
+                day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][i],
+                hours: timeStr
+            }));
+        }
+
+        // if it looks like a simple time range, apply to all days
+        const timePattern = /^\d{1,2}:\d{2}-\d{1,2}:\d{2}$/;
+        if (timePattern.test(hours)) {
+            return Array(7).fill(0).map((_, i) => ({
+                day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][i],
+                hours: hours
+            }));
+        }
+
+        // fallback: return the raw hours string for each day
+        return Array(7).fill(0).map((_, i) => ({
+            day: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][i],
+            hours: hours
+        }));
+
+    } catch (error) {
+        console.error('Error parsing opening hours:', error);
+        return null;
+    }
+}
+
+function formatOperatingHours(hours?: string) {
+    const parsed = parseOpeningHours(hours);
+
+    if (parsed) {
+        return parsed;
+    }
+
+    // fallback
     return [
-        { day: "Monday", hours: defaultHours },
-        { day: "Tuesday", hours: defaultHours },
-        { day: "Wednesday", hours: defaultHours },
-        { day: "Thursday", hours: defaultHours },
-        { day: "Friday", hours: defaultHours },
-        { day: "Saturday", hours: defaultHours },
-        { day: "Sunday", hours: defaultHours },
+        { day: "Monday", hours: "Hours not available" },
+        { day: "Tuesday", hours: "Hours not available" },
+        { day: "Wednesday", hours: "Hours not available" },
+        { day: "Thursday", hours: "Hours not available" },
+        { day: "Friday", hours: "Hours not available" },
+        { day: "Saturday", hours: "Hours not available" },
+        { day: "Sunday", hours: "Hours not available" },
     ];
 }
 
@@ -159,12 +228,33 @@ export default function ClinicInfoPanel({
                                 Operating Hours
                             </Text>
                             <Stack gap={2}>
-                                {operatingHours.map((schedule) => (
-                                    <Group justify="space-between" key={schedule.day}>
-                                        <Text size="sm">{schedule.day}</Text>
-                                        <Text size="sm" c="dimmed">{schedule.hours}</Text>
-                                    </Group>
-                                ))}
+                                <Text size="sm" c="orange" fw={500} mb={4}>
+                                    Coming Soon! Hours data not available from OpenStreetMap
+                                </Text>
+                                <Group justify="space-between">
+                                    <Text size="sm">For current hours:</Text>
+                                    <Text size="sm" c="blue">Call facility directly</Text>
+                                </Group>
+                                <Group justify="space-between">
+                                    <Text size="sm">General hours:</Text>
+                                    <Text size="sm" c="dimmed">Varies by facility type</Text>
+                                </Group>
+                                <Box mt={8} p={8} style={{ background: '#f8f9fa', borderRadius: '4px' }}>
+                                    <Text size="xs" c="dimmed">
+                                        <strong>Note:</strong> {clinic.type === 'Hospital'
+                                        ? 'Emergency departments typically operate 24/7'
+                                        : clinic.type === 'Urgent Care'
+                                            ? 'Urgent care usually: 8AM-8PM daily'
+                                            : 'Walk-in clinics typically: 9AM-5PM weekdays'
+                                    }
+                                    </Text>
+                                </Box>
+                                {/*{operatingHours.map((schedule) => (*/}
+                                {/*    <Group justify="space-between" key={schedule.day}>*/}
+                                {/*        <Text size="sm">{schedule.day}</Text>*/}
+                                {/*        <Text size="sm" c="dimmed">{schedule.hours}</Text>*/}
+                                {/*    </Group>*/}
+                                {/*))}*/}
                             </Stack>
                         </Box>
                     </Group>
@@ -188,7 +278,7 @@ export default function ClinicInfoPanel({
                                 </Text>
                             ) : (
                                 <Text size="sm" c="dimmed">
-                                    Phone not available
+                                    Phone currently not available.
                                 </Text>
                             )}
                         </Box>
