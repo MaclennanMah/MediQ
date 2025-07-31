@@ -57,7 +57,12 @@ function waitTimeColour(wt: string) {
 }
 
 /* ─────────────────────────── Card ─────────────────────────── */
-export default function ClinicCard({ clinic }: { clinic: Clinic }) {
+interface ClinicCardProps {
+  clinic: Clinic;
+  onMoreInfoClick: (clinic: Clinic) => void;
+}
+
+export default function ClinicCard({ clinic, onMoreInfoClick }: ClinicCardProps) {
   const distanceKm =
     clinic.distance != null && typeof clinic.distance === "number"
       ? (clinic.distance / 1000).toFixed(2)
@@ -108,41 +113,12 @@ export default function ClinicCard({ clinic }: { clinic: Clinic }) {
             {distanceKm ? `${distanceKm} km away from you` : "Distance unknown"}
           </Text>
         </Group>
-        <Group gap="xs">
-          <IconClockHour2 size={16} />
-          <Text size="sm">Closes at {clinic.closingTime}</Text>
-        </Group>
+        {/*Commenting out for the time being. Unable to add operating hours at this time. */}
+        {/*<Group gap="xs">*/}
+        {/*  <IconClockHour2 size={16} />*/}
+        {/*  <Text size="sm">Closes at {clinic.closingTime}</Text>*/}
+        {/*</Group>*/}
       </Stack>
-
-      {/* ── NEW: Services / Hours / Contact ────────────────────── */}
-      {clinic.services && clinic.services.length > 0 && (
-        <Text size="sm" mt="sm">
-          <b>Services:</b> {clinic.services.join(", ")}
-        </Text>
-      )}
-
-      {clinic.hours && (
-        <Text size="sm">
-          <b>Hours:</b> {clinic.hours}
-        </Text>
-      )}
-
-      {clinic.contact && (clinic.contact.phone || clinic.contact.email) && (
-        <Text size="sm">
-          {clinic.contact.phone && (
-            <>
-              📞 {clinic.contact.phone}
-              <br />
-            </>
-          )}
-          {clinic.contact.email && (
-            <>
-              ✉️ {clinic.contact.email}
-              <br />
-            </>
-          )}
-        </Text>
-      )}
 
       {/* ── Buttons ────────────────────────────────────────────── */}
       <Group justify="center" mt="md">
@@ -173,7 +149,7 @@ export default function ClinicCard({ clinic }: { clinic: Clinic }) {
           </Stack>
         </Button>
 
-        <Button color="blue" radius="md" h={60} w={125} p="xs">
+        <Button color="blue" radius="md" h={60} w={125} p="xs" onClick={() => onMoreInfoClick(clinic)}>
           <Stack gap={4} align="center">
             <IconInfoCircle size={20} />
             <Text className="montserrat-med" size="xs">

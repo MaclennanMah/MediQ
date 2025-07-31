@@ -19,6 +19,11 @@ import {
   IconUserFilled
 } from "@tabler/icons-react";
 import { GeolocationControl } from './geolocation-control';
+import { Clinic } from "@/models/clinic";
+
+interface ClinicMapProps {
+  onClinicSelect?: (clinic: Clinic) => void;
+}
 
 function MapEventHandler() {
   const { updateMapBounds } = useClinicContext();
@@ -74,7 +79,7 @@ function AutoCenterOnUser() {
   return null;
 }
 
-function ClinicMap() {
+function ClinicMap({onClinicSelect}:ClinicMapProps) {
   const { clinics, userLocation } = useClinicContext();
   const { colorScheme } = useMantineColorScheme();
 
@@ -118,6 +123,14 @@ function ClinicMap() {
     36, 18, 36
   );
 
+  const handleMarkerClick = (clinic: Clinic) => {
+    setSelectedClinic(clinic.id);
+    // call the parent callback to open the info panel
+    if (onClinicSelect) {
+      onClinicSelect(clinic);
+    }
+  };
+
   return (
     <>
       <MapContainer
@@ -148,9 +161,7 @@ function ClinicMap() {
             }
             icon={selectedClinic === clinic.id ? selectedIcon : clinicIcon}
             eventHandlers={{
-              click: () => {
-                setSelectedClinic(clinic.id);
-              },
+              click: () => handleMarkerClick(clinic),
             }}
           >
             <Popup>

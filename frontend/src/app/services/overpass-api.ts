@@ -75,9 +75,21 @@ export async function fetchMedicalFacilities(bounds: [number, number, number, nu
   }
 }
 
+function normalizeWebsite(url?: string): string | undefined {
+    if (!url) return undefined;
+
+    // add protocol if missing
+    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+        return `https://${url}`;
+    }
+
+    return url;
+}
+
 function parseContact(tags: Record<string, string>) {
   const phone = tags.phone ?? tags["contact:phone"];
   const email = tags.email ?? tags["contact:email"];
+  const website = normalizeWebsite(tags.website ?? tags["contact:website"]);
   return phone || email ? { phone, email } : undefined;
 }
 
@@ -130,12 +142,13 @@ function transformOverpassData(data: any): Clinic[] {
         type,
         name,
         isOpen: true,
-        distance: "N/A",
+        distance: undefined,
         closingTime: hours ?? "Unknown",
         estimatedWaitTime: "N/A",
         services,
         hours,
         contact,
+        tags: t,
         location: lat != null ? { lat, lng } : { lat: 0, lng: 0 },
       } as Clinic;
     });
