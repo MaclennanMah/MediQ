@@ -20,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 import { GeolocationControl } from './geolocation-control';
 import { Clinic } from "@/models/clinic";
+import { extractClosingTime, determineOpenStatus } from "@/utils/time";
 
 interface ClinicMapProps {
   onClinicSelect?: (clinic: Clinic) => void;
@@ -98,29 +99,29 @@ function ClinicMap({onClinicSelect}:ClinicMapProps) {
 
   // create map icons
   const clinicIcon = createTablerIcon(
-    <IconMapPinFilled
-        size={32}
-        color={colors.primary}
-        strokeWidth={2}
-    />,
+      <IconMapPinFilled
+          size={32}
+          color={colors.primary}
+          strokeWidth={2}
+      />,
       32, 16, 32
   );
 
   const selectedIcon = createTablerIcon(
-    <IconFlag3Filled
-        size={40}
-        color={colors.selected}
-    />,
-    40, 20, 40
+      <IconFlag3Filled
+          size={40}
+          color={colors.selected}
+      />,
+      40, 20, 40
   );
 
   const userLocationIcon = createTablerIcon(
-    <IconUserFilled
-        size={36}
-        color={colors.user}
-        strokeWidth={1.5}
-    />,
-    36, 18, 36
+      <IconUserFilled
+          size={36}
+          color={colors.user}
+          strokeWidth={1.5}
+      />,
+      36, 18, 36
   );
 
   const handleMarkerClick = (clinic: Clinic) => {
@@ -132,66 +133,70 @@ function ClinicMap({onClinicSelect}:ClinicMapProps) {
   };
 
   return (
-    <>
-      <MapContainer
-        center={defaultCenter as [number, number]}
-        zoom={13}
-        scrollWheelZoom={true}
-        style={{ height: "100%", width: "100%" }}
-      >
-        <TileLayer // using Stadia Alidade Smooth style
-            attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
-            url={
-              colorScheme === 'dark'
-                  ? "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-                  : "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
-            }
-            key={colorScheme}
-        />
+      <>
+        <MapContainer
+            center={defaultCenter as [number, number]}
+            zoom={13}
+            scrollWheelZoom={true}
+            style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer // using Stadia Alidade Smooth style
+              attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
+              url={
+                colorScheme === 'dark'
+                    ? "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+                    : "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+              }
+              key={colorScheme}
+          />
 
-        {/* Add markers for each clinic */}
-        {clinics.map((clinic) => (
-          <Marker
-            // icon={markerIcon}
-            key={clinic.id}
-            position={
-              clinic.location
-                ? [clinic.location.lat, clinic.location.lng]
-                : (defaultCenter as [number, number])
-            }
-            icon={selectedClinic === clinic.id ? selectedIcon : clinicIcon}
-            eventHandlers={{
-              click: () => handleMarkerClick(clinic),
-            }}
-          >
-            <Popup>
-              <div>
-                <h3>{clinic.name}</h3>
-                <p>Type: {clinic.type}</p>
-                <p>Status: {clinic.isOpen ? "Open" : "Closed"}</p>
-                <p>Closing Time: {clinic.closingTime}</p>
-                <p>Wait Time: {clinic.estimatedWaitTime}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+          {/* Add markers for each clinic */}
+          {clinics.map((clinic) => {
+            const { isOpen, hasData } = determineOpenStatus(clinic.hours);
+            const closingTime = extractClosingTime(clinic.hours);
 
-        {/* “You are here” marker */}
-        {userLocation && (
-          <Marker
-            position={[userLocation.lat, userLocation.lng]}
-            icon={userLocationIcon}
-          >
-            <Popup>You are here</Popup>
-          </Marker>
-        )}
+            return (
+                <Marker
+                    key={clinic.id}
+                    position={
+                      clinic.location
+                          ? [clinic.location.lat, clinic.location.lng]
+                          : (defaultCenter as [number, number])
+                    }
+                    icon={selectedClinic === clinic.id ? selectedIcon : clinicIcon}
+                    eventHandlers={{
+                      click: () => handleMarkerClick(clinic),
+                    }}
+                >
+                  <Popup>
+                    <div>
+                      <h3>{clinic.name}</h3>
+                      <p>Type: {clinic.type}</p>
+                      {hasData && <p>Status: {isOpen ? "Open" : "Closed"}</p>}
+                      {closingTime && <p>Closes at: {closingTime}</p>}
+                      <p>Wait Time: {clinic.estimatedWaitTime}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+            );
+          })}
 
-        {/* Component to handle map events */}
-        <MapEventHandler />
-        <AutoCenterOnUser />
-        <GeolocationControl />
-      </MapContainer>
-    </>
+          {/* "You are here" marker */}
+          {userLocation && (
+              <Marker
+                  position={[userLocation.lat, userLocation.lng]}
+                  icon={userLocationIcon}
+              >
+                <Popup>You are here</Popup>
+              </Marker>
+          )}
+
+          {/* Component to handle map events */}
+          <MapEventHandler />
+          <AutoCenterOnUser />
+          <GeolocationControl />
+        </MapContainer>
+      </>
   );
 }
 
