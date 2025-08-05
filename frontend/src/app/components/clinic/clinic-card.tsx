@@ -18,32 +18,33 @@ import {
   IconUserPin,
 } from "@tabler/icons-react";
 import { Clinic } from "@/models/clinic";
+import { determineOpenStatus, extractClosingTime } from "@/utils/time";
 
 /* ─────────────────────────── Skeleton ─────────────────────────── */
 export function ClinicCardSkeleton() {
   return (
-    <Card shadow="sm" p="lg" radius="md" miw={436} withBorder>
-      <Card.Section>
-        <Group justify="flex-start" align="center" p="md">
-          <Skeleton height={20} width={62} radius="sm" />
-          <Skeleton height={20} width={62} radius="sm" />
-        </Group>
-      </Card.Section>
+      <Card shadow="sm" p="lg" radius="md" miw={436} withBorder>
+        <Card.Section>
+          <Group justify="flex-start" align="center" p="md">
+            <Skeleton height={20} width={62} radius="sm" />
+            <Skeleton height={20} width={62} radius="sm" />
+          </Group>
+        </Card.Section>
 
-      <Group justify="space-between" mb="xs">
-        <Skeleton height={25} width={150} radius="sm" />
-        <Skeleton height={20} width={42} radius="sm" />
-      </Group>
-      <Stack gap="0">
-        <Skeleton height={24} width="70%" radius="sm" />
-        <Skeleton height={24} width="60%" radius="sm" />
-      </Stack>
-      <Group>
-        <Skeleton height={36} width={100} mt="md" radius="md" />
-        <Skeleton height={36} width={100} mt="md" radius="md" />
-        <Skeleton height={36} width={100} mt="md" radius="md" />
-      </Group>
-    </Card>
+        <Group justify="space-between" mb="xs">
+          <Skeleton height={25} width={150} radius="sm" />
+          <Skeleton height={20} width={42} radius="sm" />
+        </Group>
+        <Stack gap="0">
+          <Skeleton height={24} width="70%" radius="sm" />
+          <Skeleton height={24} width="60%" radius="sm" />
+        </Stack>
+        <Group>
+          <Skeleton height={36} width={100} mt="md" radius="md" />
+          <Skeleton height={36} width={100} mt="md" radius="md" />
+          <Skeleton height={36} width={100} mt="md" radius="md" />
+        </Group>
+      </Card>
   );
 }
 
@@ -64,100 +65,109 @@ interface ClinicCardProps {
 
 export default function ClinicCard({ clinic, onMoreInfoClick }: ClinicCardProps) {
   const distanceKm =
-    clinic.distance != null && typeof clinic.distance === "number"
-      ? (clinic.distance / 1000).toFixed(2)
-      : clinic.distance; // fallback to string
+      clinic.distance != null && typeof clinic.distance === "number"
+          ? (clinic.distance / 1000).toFixed(2)
+          : clinic.distance; // fallback to string
 
   const colour = waitTimeColour(clinic.estimatedWaitTime);
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinic.location.lat},${clinic.location.lng}`;
 
+  // get accurate open/closed status and closing time
+  const { isOpen, hasData } = determineOpenStatus(clinic.hours);
+  const closingTime = extractClosingTime(clinic.hours);
+
   return (
-    <Card shadow="sm" p="lg" radius="md" miw={450} withBorder>
-      {/* ── Labels ─────────────────────────────────────────────── */}
-      <Card.Section>
-        <Group justify="flex-start" align="center" p="md">
-          <Badge color="blue" variant="light">
-            <Text size="xs" c="dimmed">
-              {clinic.type}
-            </Text>
-          </Badge>
-          <Badge color={clinic.isOpen ? "green" : "red"} variant="light">
-            <Text size="xs" c="dimmed">
-              {clinic.isOpen ? "OPEN" : "CLOSED"}
-            </Text>
-          </Badge>
-        </Group>
-      </Card.Section>
+      <Card shadow="sm" p="lg" radius="md" miw={450} withBorder>
+        {/* ── Labels ─────────────────────────────────────────────── */}
+        <Card.Section>
+          <Group justify="flex-start" align="center" p="md">
+            <Badge color="blue" variant="light">
+              <Text size="xs" c="dimmed">
+                {clinic.type}
+              </Text>
+            </Badge>
+            {/* only show open/closed badge if we have hours data */}
+            {hasData && (
+                <Badge color={isOpen ? "green" : "red"} variant="light">
+                  <Text size="xs" c="dimmed">
+                    {isOpen ? "OPEN" : "CLOSED"}
+                  </Text>
+                </Badge>
+            )}
+          </Group>
+        </Card.Section>
 
-      {/* ── Name + Wait-time badge ─────────────────────────────── */}
-      <Group justify="space-between" mb="xs">
-        <Text
-          className="montserrat-bold"
-          fz="lg"
-          style={{ flex: 1, minWidth: 0 }}
-          lineClamp={2}
-        >
-          {clinic.name}
-        </Text>
-
-        <Badge color={colour} style={{ flexShrink: 0, alignSelf: "center" }}>
-          {clinic.estimatedWaitTime}
-        </Badge>
-      </Group>
-
-      {/* ── Distance & Closing Time ────────────────────────────── */}
-      <Stack gap={2}>
-        <Group gap="xs">
-          <IconUserPin size={16} />
-          <Text size="sm">
-            {distanceKm ? `${distanceKm} km away from you` : "Distance unknown"}
+        {/* ── Name + Wait-time badge ─────────────────────────────── */}
+        <Group justify="space-between" mb="xs">
+          <Text
+              className="montserrat-bold"
+              fz="lg"
+              style={{ flex: 1, minWidth: 0 }}
+              lineClamp={2}
+          >
+            {clinic.name}
           </Text>
+
+          <Badge color={colour} style={{ flexShrink: 0, alignSelf: "center" }}>
+            {clinic.estimatedWaitTime}
+          </Badge>
         </Group>
-        {/*Commenting out for the time being. Unable to add operating hours at this time. */}
-        {/*<Group gap="xs">*/}
-        {/*  <IconClockHour2 size={16} />*/}
-        {/*  <Text size="sm">Closes at {clinic.closingTime}</Text>*/}
-        {/*</Group>*/}
-      </Stack>
 
-      {/* ── Buttons ────────────────────────────────────────────── */}
-      <Group justify="center" mt="md">
-        <Button
-          color="blue"
-          radius="md"
-          h={60}
-          w={125}
-          p="xs"
-          component="a"
-          href={mapsUrl}
-          target="_blank"
-        >
-          <Stack gap={4} align="center">
-            <IconMapPin2 size={20} />
-            <Text className="montserrat-med" size="xs">
-              DIRECTIONS
+        {/* ── Distance & Closing Time ────────────────────────────── */}
+        <Stack gap={2}>
+          <Group gap="xs">
+            <IconUserPin size={16} />
+            <Text size="sm">
+              {distanceKm ? `${distanceKm} km away from you` : "Distance unknown"}
             </Text>
-          </Stack>
-        </Button>
+          </Group>
+          {/* only show closing time if we have valid data */}
+          {closingTime && (
+              <Group gap="xs">
+                <IconClockHour2 size={16} />
+                <Text size="sm">Closes at {closingTime}</Text>
+              </Group>
+          )}
+        </Stack>
 
-        <Button color="blue" radius="md" h={60} w={125} p="xs">
-          <Stack gap={4} align="center">
-            <IconHourglassEmpty size={20} />
-            <Text className="montserrat-med" size="xs">
-              SUGGEST&nbsp;TIME
-            </Text>
-          </Stack>
-        </Button>
+        {/* ── Buttons ────────────────────────────────────────────── */}
+        <Group justify="center" mt="md">
+          <Button
+              color="blue"
+              radius="md"
+              h={60}
+              w={125}
+              p="xs"
+              component="a"
+              href={mapsUrl}
+              target="_blank"
+          >
+            <Stack gap={4} align="center">
+              <IconMapPin2 size={20} />
+              <Text className="montserrat-med" size="xs">
+                DIRECTIONS
+              </Text>
+            </Stack>
+          </Button>
 
-        <Button color="blue" radius="md" h={60} w={125} p="xs" onClick={() => onMoreInfoClick(clinic)}>
-          <Stack gap={4} align="center">
-            <IconInfoCircle size={20} />
-            <Text className="montserrat-med" size="xs">
-              MORE&nbsp;INFO
-            </Text>
-          </Stack>
-        </Button>
-      </Group>
-    </Card>
+          <Button color="blue" radius="md" h={60} w={125} p="xs">
+            <Stack gap={4} align="center">
+              <IconHourglassEmpty size={20} />
+              <Text className="montserrat-med" size="xs">
+                SUGGEST&nbsp;TIME
+              </Text>
+            </Stack>
+          </Button>
+
+          <Button color="blue" radius="md" h={60} w={125} p="xs" onClick={() => onMoreInfoClick(clinic)}>
+            <Stack gap={4} align="center">
+              <IconInfoCircle size={20} />
+              <Text className="montserrat-med" size="xs">
+                MORE&nbsp;INFO
+              </Text>
+            </Stack>
+          </Button>
+        </Group>
+      </Card>
   );
 }
