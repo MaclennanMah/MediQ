@@ -77,14 +77,20 @@ router.get("/nearby", async (req, res) => {
 
     // 3) upsert into Mongo, collect docs
     const orgDocs = await Promise.all(elements.map(async el => {
+      console.log(`element detected: ${elements[0]}`)
       const externalId = `${el.type}/${el.id}`;
-      const name       = el.tags.name || el.tags["name:en"] || "Unknown";
-      const addrParts  = ["addr:street","addr:housenumber","addr:city"]
-                          .map(k => el.tags[k]).filter(Boolean);
+      const name = el.tags?.name || el.tags?.["name:en"] || "Unknown";
+      const addrParts = ["addr:street","addr:housenumber","addr:city"]
+      .map(k => el.tags?.[k])  // ✅ safe even if el.tags is undefined
+      .filter(Boolean);
       const address    = addrParts.join(" ") || name;
-      const coords     = el.type === "node"
+      const coords     = el.type === "node" && el.lon !== undefined && el.lat !== undefined
         ? [el.lon, el.lat]
-        : [el.center.lon, el.center.lat];
+        : (el.center?.lon !== undefined && el.center?.lat !== undefined
+            ? [el.center.lon, el.center.lat]
+            : null);
+
+      if (!coords) return null;
 
       return HealthcareOrganization.findOneAndUpdate(
         { externalId },
@@ -92,8 +98,8 @@ router.get("/nearby", async (req, res) => {
             externalId,
             organizationName: name,
             address,
-            organizationType: el.tags.amenity==="hospital"
-                               ? "Hospital" : "Walk-In Clinic",
+            organizationType: el.tags?.amenity === "hospital"
+              ? "Hospital" : "Walk-In Clinic",
             location: { type: "Point", coordinates: coords }
           }
         },
