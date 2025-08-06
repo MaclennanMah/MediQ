@@ -9,7 +9,7 @@ import React, {
   ReactNode,
 } from "react";
 import { Clinic } from "@/models/clinic";
-import { fetchMedicalFacilities } from "@/services/overpass-api";
+import { fetchMedicalFacilities } from "@/services/new-overpass-api";
 import { mockClinics } from "@/data/mock-clinics";
 import { haversineDistance } from "@/utils/distance";
 

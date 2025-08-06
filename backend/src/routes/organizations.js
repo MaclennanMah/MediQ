@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import HealthcareOrganization from '../../database/mongodb_db/models/HealthCareOrganization.js';
 import geo from '../../services/geocoder.js';
+import { fetchFromOverpass } from '../../services/overpass-backend.js';
+import { estimateWaitTime } from '../../services/estimateWaitTime.js';
 
 // Set router
 const router = express.Router();
@@ -59,6 +61,67 @@ router.get('/search/near', async (req, res) => {
   }).lean();
 
   res.json(nearby);
+});
+
+router.get("/nearby", async (req, res) => {
+  try {
+    // 1) get & validate bbox
+    const { south, west, north, east } = req.query;
+    if ([south, west, north, east].some(v => v == null)) {
+      return res.status(400).json({ error: "Missing bbox parameters" });
+    }
+    const bbox = [south, west, north, east].map(Number);
+
+    // 2) fetch Overpass data
+    const { elements } = await fetchFromOverpass(bbox);
+
+    // 3) upsert into Mongo, collect docs
+    const orgDocs = await Promise.all(elements.map(async el => {
+      console.log(`element detected: ${elements[0]}`)
+      const externalId = `${el.type}/${el.id}`;
+      const name = el.tags?.name || el.tags?.["name:en"] || "Unknown";
+      const addrParts = ["addr:street","addr:housenumber","addr:city"]
+      .map(k => el.tags?.[k])  // ✅ safe even if el.tags is undefined
+      .filter(Boolean);
+      const address    = addrParts.join(" ") || name;
+      const coords     = el.type === "node" && el.lon !== undefined && el.lat !== undefined
+        ? [el.lon, el.lat]
+        : (el.center?.lon !== undefined && el.center?.lat !== undefined
+            ? [el.center.lon, el.center.lat]
+            : null);
+
+      if (!coords) return null;
+
+      return HealthcareOrganization.findOneAndUpdate(
+        { externalId },
+        { $setOnInsert: {
+            externalId,
+            organizationName: name,
+            address,
+            organizationType: el.tags?.amenity === "hospital"
+              ? "Hospital" : "Walk-In Clinic",
+            location: { type: "Point", coordinates: coords }
+          }
+        },
+        { upsert: true, new: true }
+      );
+    }));
+
+    // 4) attach latest wait times
+    const result = await Promise.all(orgDocs.map(async org => {
+      const wait = await estimateWaitTime(org._id);
+      const obj  = org.toObject();
+      obj.estimatedWaitTime = wait;
+      return obj;
+    }));
+
+    // 5) return to client
+    res.json(result);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch nearby organizations" });
+  }
 });
 
 /**
@@ -203,5 +266,7 @@ router.put('/:orgID', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
 
 export default router;

@@ -1,6 +1,7 @@
 // backend/src/index.js
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors"
 
 // 1. Load .env variables first
 dotenv.config();
@@ -10,6 +11,8 @@ const app = express();
 
 // 3. Mount middleware
 app.use(express.json());
+app.use(cors());               // ← enable CORS for all routes (or pass options)
+
 
 // 4. Mount routes *after* app exists
 import pingRouter from "./routes/ping.js";
