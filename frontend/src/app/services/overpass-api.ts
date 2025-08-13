@@ -1,6 +1,40 @@
 import { Clinic } from '@/models/clinic';
 
 /**
+ * Generates a random wait time based on facility type and time of day.
+ * Clinics have lower wait times than hospitals, and no wait time exceeds 3 hours.
+ * @param facilityType - The type of medical facility ("Clinic", "Hospital", or "Urgent Care")
+ * @returns string - A formatted wait time string (e.g., "30m")
+ */
+function generateRandomWaitTime(facilityType: string): string {
+  const currentHour = new Date().getHours();
+  let maxWaitTime: number;
+
+  if (facilityType === "Hospital") {
+    maxWaitTime = 180;
+  } else if (facilityType === "Urgent Care") {
+    maxWaitTime = 120;
+  } else {
+    maxWaitTime = 90;
+  }
+
+
+  let timeMultiplier = 0.5;
+
+  if ((currentHour >= 8 && currentHour <= 11) || 
+      (currentHour >= 12 && currentHour <= 14) || 
+      (currentHour >= 17 && currentHour <= 20)) {
+    timeMultiplier = 1.0;
+  } else if (currentHour >= 22 || currentHour <= 6) {
+    timeMultiplier = 0.3;
+  }
+
+  const waitTimeMinutes = Math.floor(Math.random() * maxWaitTime * timeMultiplier) + 1;
+
+  return `${waitTimeMinutes}m`;
+}
+
+/**
  * Fetches medical facilities (emergency care and walk-in clinics) from the Overpass API within the given bounding box.
  * @param bounds - The bounding box coordinates [south, west, north, east]
  * @returns Promise<Clinic[]> - A promise that resolves to an array of clinics
@@ -137,6 +171,7 @@ function transformOverpassData(data: any): Clinic[] {
         }
       }
 
+      const estimatedWaitTime = generateRandomWaitTime(type);
       return {
         id,
         type,
@@ -144,7 +179,7 @@ function transformOverpassData(data: any): Clinic[] {
         isOpen: true,
         distance: undefined,
         closingTime: hours ?? "Unknown",
-        estimatedWaitTime: "N/A",
+        estimatedWaitTime,
         services,
         hours,
         contact,
