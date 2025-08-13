@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
     Stack,
     Text,
@@ -12,6 +12,8 @@ import {
     ScrollArea,
     ActionIcon,
     Skeleton,
+    Modal,
+    NumberInput,
 } from "@mantine/core";
 import {
     IconMapPin,
@@ -25,6 +27,7 @@ import {
 import { Clinic } from "@/models/clinic";
 import { useClinicAddress } from "@/utils/address";
 import { convertTimeRangeTo12Hour, determineOpenStatus, parseOpeningHours } from "@/utils/time";
+import { useClinicContext } from "@/context/clinic-context";
 
 interface ClinicInfoPanelProps {
     clinic: Clinic;
@@ -37,6 +40,20 @@ function waitTimeColour(wt: string) {
     if (n < 15) return "green";
     if (n < 30) return "yellow";
     return "red";
+}
+
+function formatWaitTime(waitTime: string): string {
+    if (waitTime === "N/A") return waitTime;
+    const minutes = parseInt(waitTime);
+    if (isNaN(minutes)) return waitTime;
+
+    if (minutes > 59) {
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        return `${hours}h:${remainingMinutes}m`;
+    }
+
+    return waitTime;
 }
 
 function formatOperatingHours(hours?: string) {
@@ -57,6 +74,12 @@ export default function ClinicInfoPanel({
                                             clinic,
                                             onBack,
                                         }: ClinicInfoPanelProps) {
+    const { updateWaitTime } = useClinicContext();
+    const [suggestTimeModalOpen, setSuggestTimeModalOpen] = useState(false);
+    const [suggestedWaitTime, setSuggestedWaitTime] = useState<number | undefined>(
+        clinic.estimatedWaitTime !== "N/A" ? parseInt(clinic.estimatedWaitTime) : undefined
+    );
+
     const colour = waitTimeColour(clinic.estimatedWaitTime);
     const operatingHours = formatOperatingHours(clinic.hours);
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinic.location.lat},${clinic.location.lng}`;
@@ -72,6 +95,13 @@ export default function ClinicInfoPanel({
         clinic.distance != null && typeof clinic.distance === "number"
             ? (clinic.distance / 1000).toFixed(2)
             : null;
+
+    const handleSuggestTimeSubmit = () => {
+        if (suggestedWaitTime !== undefined) {
+            updateWaitTime(clinic.id, `${suggestedWaitTime}m`);
+            setSuggestTimeModalOpen(false);
+        }
+    };
 
     return (
         <Stack h="90vh" maw={450} mx="auto">
@@ -270,7 +300,7 @@ export default function ClinicInfoPanel({
                                 </Text>
                                 <Badge color={colour} size="xl" variant="filled">
                                     <Text size="lg" fw={700}>
-                                        {clinic.estimatedWaitTime}
+                                        {formatWaitTime(clinic.estimatedWaitTime)}
                                     </Text>
                                 </Badge>
                             </Group>
@@ -283,6 +313,7 @@ export default function ClinicInfoPanel({
                                 size="md"
                                 radius="md"
                                 leftSection={<IconHourglassEmpty size={20}/>}
+                                onClick={() => setSuggestTimeModalOpen(true)}
                             >
                                 Suggest Wait Time
                             </Button>
@@ -302,6 +333,35 @@ export default function ClinicInfoPanel({
                     </Stack>
                 </Stack>
             </ScrollArea>
+            <Modal
+                opened={suggestTimeModalOpen}
+                onClose={() => setSuggestTimeModalOpen(false)}
+                title={`Suggest wait time for ${clinic.name}`}
+                size="sm"
+            >
+                <Stack>
+                    <Text size="sm">
+                        Current estimated wait time: {formatWaitTime(clinic.estimatedWaitTime)}
+                    </Text>
+                    <NumberInput
+                        label="Suggest new wait time (minutes)"
+                        placeholder="Enter wait time in minutes"
+                        value={suggestedWaitTime}
+                        onChange={(value) => setSuggestedWaitTime(value as number)}
+                        min={1}
+                        max={180}
+                        required
+                    />
+                    <Group justify="flex-end" mt="md">
+                        <Button variant="outline" onClick={() => setSuggestTimeModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSuggestTimeSubmit}>
+                            Submit
+                        </Button>
+                    </Group>
+                </Stack>
+            </Modal>
         </Stack>
     );
 }

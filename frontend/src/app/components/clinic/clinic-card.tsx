@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Badge,
   Button,
@@ -9,6 +9,8 @@ import {
   Skeleton,
   Stack,
   Text,
+  Modal,
+  NumberInput,
 } from "@mantine/core";
 import {
   IconMapPin2,
@@ -19,6 +21,7 @@ import {
 } from "@tabler/icons-react";
 import { Clinic } from "@/models/clinic";
 import { determineOpenStatus, extractClosingTime } from "@/utils/time";
+import { useClinicContext } from "@/context/clinic-context";
 
 /* ─────────────────────────── Skeleton ─────────────────────────── */
 export function ClinicCardSkeleton() {
@@ -57,6 +60,21 @@ function waitTimeColour(wt: string) {
   return "red";
 }
 
+function formatWaitTime(waitTime: string): string {
+  if (waitTime === "N/A") return waitTime;
+
+  const minutes = parseInt(waitTime);
+  if (isNaN(minutes)) return waitTime;
+
+  if (minutes > 59) {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h:${remainingMinutes}m`;
+  }
+
+  return waitTime;
+}
+
 /* ─────────────────────────── Card ─────────────────────────── */
 interface ClinicCardProps {
   clinic: Clinic;
@@ -64,6 +82,12 @@ interface ClinicCardProps {
 }
 
 export default function ClinicCard({ clinic, onMoreInfoClick }: ClinicCardProps) {
+  const { updateWaitTime } = useClinicContext();
+  const [suggestTimeModalOpen, setSuggestTimeModalOpen] = useState(false);
+  const [suggestedWaitTime, setSuggestedWaitTime] = useState<number | undefined>(
+    clinic.estimatedWaitTime !== "N/A" ? parseInt(clinic.estimatedWaitTime) : undefined
+  );
+
   const distanceKm =
       clinic.distance != null && typeof clinic.distance === "number"
           ? (clinic.distance / 1000).toFixed(2)
@@ -75,6 +99,13 @@ export default function ClinicCard({ clinic, onMoreInfoClick }: ClinicCardProps)
   // get accurate open/closed status and closing time
   const { isOpen, hasData } = determineOpenStatus(clinic.hours);
   const closingTime = extractClosingTime(clinic.hours);
+
+  const handleSuggestTimeSubmit = () => {
+    if (suggestedWaitTime !== undefined) {
+      updateWaitTime(clinic.id, `${suggestedWaitTime}m`);
+      setSuggestTimeModalOpen(false);
+    }
+  };
 
   return (
       <Card shadow="sm" p="lg" radius="md" miw={450} withBorder>
@@ -109,7 +140,7 @@ export default function ClinicCard({ clinic, onMoreInfoClick }: ClinicCardProps)
           </Text>
 
           <Badge color={colour} style={{ flexShrink: 0, alignSelf: "center" }}>
-            {clinic.estimatedWaitTime}
+            {formatWaitTime(clinic.estimatedWaitTime)}
           </Badge>
         </Group>
 
@@ -150,7 +181,14 @@ export default function ClinicCard({ clinic, onMoreInfoClick }: ClinicCardProps)
             </Stack>
           </Button>
 
-          <Button color="blue" radius="md" h={60} w={125} p="xs">
+          <Button 
+            color="blue" 
+            radius="md" 
+            h={60} 
+            w={125} 
+            p="xs"
+            onClick={() => setSuggestTimeModalOpen(true)}
+          >
             <Stack gap={4} align="center">
               <IconHourglassEmpty size={20} />
               <Text className="montserrat-med" size="xs">
@@ -168,6 +206,36 @@ export default function ClinicCard({ clinic, onMoreInfoClick }: ClinicCardProps)
             </Stack>
           </Button>
         </Group>
+
+        <Modal
+          opened={suggestTimeModalOpen}
+          onClose={() => setSuggestTimeModalOpen(false)}
+          title={`Suggest wait time for ${clinic.name}`}
+          size="sm"
+        >
+          <Stack>
+            <Text size="sm">
+              Current estimated wait time: {formatWaitTime(clinic.estimatedWaitTime)}
+            </Text>
+            <NumberInput
+              label="Suggest new wait time (minutes)"
+              placeholder="Enter wait time in minutes"
+              value={suggestedWaitTime}
+              onChange={(value) => setSuggestedWaitTime(value as number)}
+              min={1}
+              max={180}
+              required
+            />
+            <Group justify="flex-end" mt="md">
+              <Button variant="outline" onClick={() => setSuggestTimeModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSuggestTimeSubmit}>
+                Submit
+              </Button>
+            </Group>
+          </Stack>
+        </Modal>
       </Card>
   );
 }
