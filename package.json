@@ -8,16 +8,17 @@
     "doc": "docs"
   },
   "scripts": {
-    "install:all":  "cd backend && npm ci && cd ../frontend && npm ci",
-    "lint":         "npm --prefix frontend run lint && npm --prefix backend run lint",
-    "test":         "npm --prefix backend run test",
-    "build":        "npm --prefix frontend run build",
-    "prepare":      "husky install",
-    "dev:backend":  "npm --prefix backend run dev",
+    "install:all": "cd backend && npm ci && cd ../frontend && npm ci",
+    "lint": "npm --prefix frontend run lint && npm --prefix backend run lint",
+    "test": "npm --prefix backend run test",
+    "build": "npm --prefix frontend run build",
+    "prepare": "husky install",
+    "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
-    "dev":          "concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
   },
   "dependencies": {
+    "@tabler/icons-react": "^3.34.0",
     "cliui": "^8.0.1",
     "color-convert": "^2.0.1",
     "color-name": "^1.1.4",
@@ -25,7 +26,10 @@
     "escalade": "^3.2.0",
     "get-caller-file": "^2.0.5",
     "has-flag": "^4.0.0",
+    "leaflet-color-markers": "^0.1.0",
     "lodash": "^4.17.21",
+    "node-geocoder": "^4.4.1",
+    "p-throttle": "^7.0.0",
     "require-directory": "^2.1.1",
     "rxjs": "^7.8.2",
     "shell-quote": "^1.8.2",

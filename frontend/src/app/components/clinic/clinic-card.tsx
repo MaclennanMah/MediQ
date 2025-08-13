@@ -1,0 +1,241 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+  Badge,
+  Button,
+  Card,
+  Group,
+  Skeleton,
+  Stack,
+  Text,
+  Modal,
+  NumberInput,
+} from "@mantine/core";
+import {
+  IconMapPin2,
+  IconHourglassEmpty,
+  IconInfoCircle,
+  IconClockHour2,
+  IconUserPin,
+} from "@tabler/icons-react";
+import { Clinic } from "@/models/clinic";
+import { determineOpenStatus, extractClosingTime } from "@/utils/time";
+import { useClinicContext } from "@/context/clinic-context";
+
+/* ─────────────────────────── Skeleton ─────────────────────────── */
+export function ClinicCardSkeleton() {
+  return (
+      <Card shadow="sm" p="lg" radius="md" miw={436} withBorder>
+        <Card.Section>
+          <Group justify="flex-start" align="center" p="md">
+            <Skeleton height={20} width={62} radius="sm" />
+            <Skeleton height={20} width={62} radius="sm" />
+          </Group>
+        </Card.Section>
+
+        <Group justify="space-between" mb="xs">
+          <Skeleton height={25} width={150} radius="sm" />
+          <Skeleton height={20} width={42} radius="sm" />
+        </Group>
+        <Stack gap="0">
+          <Skeleton height={24} width="70%" radius="sm" />
+          <Skeleton height={24} width="60%" radius="sm" />
+        </Stack>
+        <Group>
+          <Skeleton height={36} width={100} mt="md" radius="md" />
+          <Skeleton height={36} width={100} mt="md" radius="md" />
+          <Skeleton height={36} width={100} mt="md" radius="md" />
+        </Group>
+      </Card>
+  );
+}
+
+/* ─────────────────────────── Helpers ─────────────────────────── */
+function waitTimeColour(wt: string) {
+  const n = parseInt(wt); // crude “30m” → 30
+  if (isNaN(n)) return "gray";
+  if (n < 15) return "green";
+  if (n < 30) return "yellow";
+  return "red";
+}
+
+function formatWaitTime(waitTime: string): string {
+  if (waitTime === "N/A") return waitTime;
+
+  const minutes = parseInt(waitTime);
+  if (isNaN(minutes)) return waitTime;
+
+  if (minutes > 59) {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h:${remainingMinutes}m`;
+  }
+
+  return waitTime;
+}
+
+/* ─────────────────────────── Card ─────────────────────────── */
+interface ClinicCardProps {
+  clinic: Clinic;
+  onMoreInfoClick: (clinic: Clinic) => void;
+}
+
+export default function ClinicCard({ clinic, onMoreInfoClick }: ClinicCardProps) {
+  const { updateWaitTime } = useClinicContext();
+  const [suggestTimeModalOpen, setSuggestTimeModalOpen] = useState(false);
+  const [suggestedWaitTime, setSuggestedWaitTime] = useState<number | undefined>(
+    clinic.estimatedWaitTime !== "N/A" ? parseInt(clinic.estimatedWaitTime) : undefined
+  );
+
+  const distanceKm =
+      clinic.distance != null && typeof clinic.distance === "number"
+          ? (clinic.distance / 1000).toFixed(2)
+          : clinic.distance; // fallback to string
+
+  const colour = waitTimeColour(clinic.estimatedWaitTime);
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinic.location.lat},${clinic.location.lng}`;
+
+  // get accurate open/closed status and closing time
+  const { isOpen, hasData } = determineOpenStatus(clinic.hours);
+  const closingTime = extractClosingTime(clinic.hours);
+
+  const handleSuggestTimeSubmit = () => {
+    if (suggestedWaitTime !== undefined) {
+      updateWaitTime(clinic.id, `${suggestedWaitTime}m`);
+      setSuggestTimeModalOpen(false);
+    }
+  };
+
+  return (
+      <Card shadow="sm" p="lg" radius="md" miw={450} withBorder>
+        {/* ── Labels ─────────────────────────────────────────────── */}
+        <Card.Section>
+          <Group justify="flex-start" align="center" p="md">
+            <Badge color="blue" variant="light">
+              <Text size="xs" c="dimmed">
+                {clinic.type}
+              </Text>
+            </Badge>
+            {/* only show open/closed badge if we have hours data */}
+            {hasData && (
+                <Badge color={isOpen ? "green" : "red"} variant="light">
+                  <Text size="xs" c="dimmed">
+                    {isOpen ? "OPEN" : "CLOSED"}
+                  </Text>
+                </Badge>
+            )}
+          </Group>
+        </Card.Section>
+
+        {/* ── Name + Wait-time badge ─────────────────────────────── */}
+        <Group justify="space-between" mb="xs">
+          <Text
+              className="montserrat-bold"
+              fz="lg"
+              style={{ flex: 1, minWidth: 0 }}
+              lineClamp={2}
+          >
+            {clinic.name}
+          </Text>
+
+          <Badge color={colour} style={{ flexShrink: 0, alignSelf: "center" }}>
+            {formatWaitTime(clinic.estimatedWaitTime)}
+          </Badge>
+        </Group>
+
+        {/* ── Distance & Closing Time ────────────────────────────── */}
+        <Stack gap={2}>
+          <Group gap="xs">
+            <IconUserPin size={16} />
+            <Text size="sm">
+              {distanceKm ? `${distanceKm} km away from you` : "Distance unknown"}
+            </Text>
+          </Group>
+          {/* only show closing time if we have valid data */}
+          {closingTime && (
+              <Group gap="xs">
+                <IconClockHour2 size={16} />
+                <Text size="sm">Closes at {closingTime}</Text>
+              </Group>
+          )}
+        </Stack>
+
+        {/* ── Buttons ────────────────────────────────────────────── */}
+        <Group justify="center" mt="md">
+          <Button
+              color="blue"
+              radius="md"
+              h={60}
+              w={125}
+              p="xs"
+              component="a"
+              href={mapsUrl}
+              target="_blank"
+          >
+            <Stack gap={4} align="center">
+              <IconMapPin2 size={20} />
+              <Text className="montserrat-med" size="xs">
+                DIRECTIONS
+              </Text>
+            </Stack>
+          </Button>
+
+          <Button 
+            color="blue" 
+            radius="md" 
+            h={60} 
+            w={125} 
+            p="xs"
+            onClick={() => setSuggestTimeModalOpen(true)}
+          >
+            <Stack gap={4} align="center">
+              <IconHourglassEmpty size={20} />
+              <Text className="montserrat-med" size="xs">
+                SUGGEST&nbsp;TIME
+              </Text>
+            </Stack>
+          </Button>
+
+          <Button color="blue" radius="md" h={60} w={125} p="xs" onClick={() => onMoreInfoClick(clinic)}>
+            <Stack gap={4} align="center">
+              <IconInfoCircle size={20} />
+              <Text className="montserrat-med" size="xs">
+                MORE&nbsp;INFO
+              </Text>
+            </Stack>
+          </Button>
+        </Group>
+
+        <Modal
+          opened={suggestTimeModalOpen}
+          onClose={() => setSuggestTimeModalOpen(false)}
+          title={`Suggest wait time for ${clinic.name}`}
+          size="sm"
+        >
+          <Stack>
+            <Text size="sm">
+              Current estimated wait time: {formatWaitTime(clinic.estimatedWaitTime)}
+            </Text>
+            <NumberInput
+              label="Suggest new wait time (minutes)"
+              placeholder="Enter wait time in minutes"
+              value={suggestedWaitTime}
+              onChange={(value) => setSuggestedWaitTime(value as number)}
+              min={1}
+              max={180}
+              required
+            />
+            <Group justify="flex-end" mt="md">
+              <Button variant="outline" onClick={() => setSuggestTimeModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSuggestTimeSubmit}>
+                Submit
+              </Button>
+            </Group>
+          </Stack>
+        </Modal>
+      </Card>
+  );
+}

@@ -12,16 +12,30 @@ const healthcareOrganizationSchema = new mongoose.Schema(
       enum: ["Hospital", "Walk-In Clinic"], 
       trim: true
     },
-    latestWaitTimeSubmissionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'WaitTimeSubmission',
-      default: null,
-    },
+    // New field for the live estimate (in minutes)
+    estimatedWaitTime: { type: Number, default: null },
+    // Geocoded location for spatial queries
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number],      // [ latitude, longitude ]
+        required: true,
+        index: '2dsphere'
+      }
+    }
+    
   },
   {
     timestamps: true,
   }
 );
+
+// Add index
+healthcareOrganizationSchema.index({location: '2dsphere'})
 
 // Third argument ('healthcare_organizations') forces the collection name in MongoDB.
 const HealthcareOrganization = mongoose.model(
